@@ -1,0 +1,81 @@
+@{
+    ViewData["Title"] = " ”ÃÌ· «·œŒÊ·";
+}
+
+<div class="container mt-5">
+
+    <div class="row justify-content-center">
+
+        <div class="col-md-5">
+
+            <div class="card shadow">
+
+                <div class="card-header bg-primary text-white text-center">
+                    <h3>
+                        ‰Ÿ«„ «·√»Õ«À «·⁄·„Ì…
+                    </h3>
+                </div>
+
+
+                <div class="card-body">
+
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger text-center">
+                            @ViewBag.Error
+                        </div>
+                    }
+
+
+                    <form method="post">
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                «”„ «·„” Œœ„
+                            </label>
+
+                            <input type="text"
+                                   name="username"
+                                   class="form-control"
+                                   required />
+
+                        </div>
+
+
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                ﬂ·„… «·„—Ê—
+                            </label>
+
+                            <input type="password"
+                                   name="password"
+                                   class="form-control"
+                                   required />
+
+                        </div>
+
+
+
+                        <button type="submit"
+                                class="btn btn-primary w-100">
+
+                            œŒÊ·
+
+                        </button>
+
+
+                    </form>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

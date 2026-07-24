@@ -1,0 +1,69 @@
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.EntityFrameworkCore;
+using ResearchWeb.Data;
+var builder = WebApplication.CreateBuilder(args);
+
+
+//  ÕœÌœ „ﬂ«‰ ﬁ«⁄œ… «·»Ì«‰« 
+AppDomain.CurrentDomain.SetData(
+    "DataDirectory",
+    Path.Combine(
+        Directory.GetCurrentDirectory(),
+        "App_Data"
+    )
+);
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlite(
+        builder.Configuration.GetConnectionString("DefaultConnection")
+    ));
+// ≈÷«›… MVC
+builder.Services.AddControllersWithViews();
+
+
+//  ›⁄Ì· Session
+builder.Services.AddSession();
+
+
+var app = builder.Build();
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider
+        .GetRequiredService<ApplicationDbContext>();
+
+    db.Database.EnsureCreated();
+}
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
+}
+
+
+// app.UseHttpsRedirection(); 
+// Ì„ﬂ‰ ≈»ﬁ«ƒÂ« ≈–« ·œÌﬂ HTTPS
+// √Ê  ⁄ÿÌ·Â« „ƒﬁ « √À‰«¡ «· Ã—»… ⁄·Ï http
+
+app.UseForwardedHeaders();
+app.UseStaticFiles();
+
+app.UseRouting();
+
+
+//  ‘€Ì· Session
+app.UseSession();
+
+
+app.UseAuthorization();
+
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Login}/{action=Index}/{id?}"
+);
+
+
+app.Run();

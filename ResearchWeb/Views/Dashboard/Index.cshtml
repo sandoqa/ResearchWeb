@@ -1,0 +1,187 @@
+﻿@{
+    ViewData["Title"] = "لوحة التحكم";
+}
+
+
+<div class="container mt-5">
+
+    <h1 class="text-center">
+        لوحة التحكم
+    </h1>
+
+
+    <div class="card mt-4 shadow">
+
+        <div class="card-body text-center">
+
+            <h3>
+                مرحباً @ViewBag.Username
+            </h3>
+
+            <p>
+                الصلاحية:
+                <b>@ViewBag.Role</b>
+            </p>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- الإحصائيات -->
+
+    <div class="row mt-4">
+
+
+        <div class="col-md-4">
+
+            <div class="card shadow text-center">
+
+                <div class="card-body">
+
+                    <h3>
+                        📚 عدد الأبحاث
+                    </h3>
+
+                    <h1>
+                        @ViewBag.ResearchCount
+                    </h1>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="col-md-4">
+
+            <div class="card shadow text-center">
+
+                <div class="card-body">
+
+                    <h3>
+                        📅 الابحاث العلمية 2026
+                    </h3>
+
+                    <h1>
+                        @ViewBag.Research2026Count
+                    </h1>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="col-md-4">
+
+            <div class="card shadow text-center">
+
+                <div class="card-body">
+
+                    <h3>
+                        👥 عدد المستخدمين
+                    </h3>
+
+                    <h1>
+                        @ViewBag.UsersCount
+                    </h1>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+
+
+
+    <!-- روابط النظام -->
+
+    <div class="row mt-4">
+
+
+        <div class="col-md-4">
+
+            <div class="card text-center shadow">
+
+                <div class="card-body">
+
+                    <h4>
+                        📚 الأبحاث
+                    </h4>
+
+                    <a class="btn btn-primary"
+                       href="/Research">
+                        فتح الأبحاث
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+
+        <div class="col-md-4">
+
+            <div class="card text-center shadow">
+
+                <div class="card-body">
+
+                    <h4>
+                        📅 الابحاث العلمية 2026
+                    </h4>
+
+                    <a class="btn btn-info"
+                       href="/Research/Index">
+                        فتح أبحاث 2026
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+
+        <div class="col-md-4">
+
+            <div class="card text-center shadow">
+
+                <div class="card-body">
+
+                    <h4>
+                        👤 المستخدمون
+                    </h4>
+
+                    <a class="btn btn-success"
+                       href="#">
+                        الإدارة
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+
+</div>

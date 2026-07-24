@@ -1,0 +1,212 @@
+﻿@using Microsoft.AspNetCore.Http
+
+@{
+    ViewData["Title"] = "الأبحاث العلمية 2026";
+
+    var role = Context.Session.GetString("Role");
+}
+
+
+<h2 class="text-center mb-4">
+    الأبحاث العلمية 2026
+</h2>
+
+
+
+@if (role == "Admin")
+{
+    <a asp-controller="Research"
+       asp-action="Create"
+       class="btn btn-success mb-3">
+
+        ➕ إضافة بحث جديد
+
+    </a>
+}
+
+
+
+<form method="get" class="mb-3">
+
+    <div class="input-group">
+
+        <input type="text"
+               name="search"
+               value="@Context.Request.Query["search"]"
+               class="form-control"
+               placeholder="ابحث باسم الباحث أو عنوان البحث أو رقم البحث أو الهاتف..." />
+
+
+        <button class="btn btn-primary"
+                type="submit">
+
+            🔍 بحث
+
+        </button>
+
+
+        <a asp-action="Index"
+           class="btn btn-secondary">
+
+            ✖ مسح
+
+        </a>
+
+    </div>
+
+</form>
+
+
+
+<div class="alert alert-info text-center">
+
+    عدد الأبحاث:
+    <strong>
+        @Model.Count
+    </strong>
+
+</div>
+
+
+
+
+<div class="table-responsive">
+
+
+    <table class="table table-bordered table-striped table-hover text-center">
+
+
+        <thead class="table-dark">
+
+            <tr>
+
+                <th>ID</th>
+
+                <th>اسم الباحث</th>
+
+                <th>تاريخ الاجتماع</th>
+
+                <th>عنوان البحث</th>
+
+                <th>رقم البحث</th>
+
+                <th>رقم الاجتماع</th>
+
+                <th>نتيجة البحث</th>
+
+                <th>رقم الهاتف</th>
+
+                <th>توصيات اللجنة</th>
+
+
+                @if (role == "Admin")
+                {
+                    <th>إجراءات</th>
+                }
+
+
+            </tr>
+
+        </thead>
+
+
+
+        <tbody>
+
+
+            @foreach (var item in Model)
+            {
+
+                <tr>
+
+
+                    <td>
+                        @item.ID
+                    </td>
+
+
+                    <td>
+                        @item.اسم_الباحث
+                    </td>
+
+
+                    <td>
+                        @(item.تاريخ_الاجتماع?.ToString("dd/MM/yyyy"))
+                    </td>
+
+
+                    <td>
+                        @item.عنوان_البحث
+                    </td>
+
+
+                    <td>
+                        @item.رقم_البحث
+                    </td>
+
+
+                    <td>
+                        @item.رقم_الاجتماع
+                    </td>
+
+
+                    <td>
+                        @item.نتيجة_البحث
+                    </td>
+
+
+                    <td>
+                        @item.رقم_الهاتف
+                    </td>
+
+
+                    <td>
+                        @item.توصيات_اللجنة
+                    </td>
+
+
+
+                    @if (role == "Admin")
+                    {
+
+                        <td>
+
+
+                            <a asp-action="Edit"
+                               asp-route-id="@item.ID"
+                               class="btn btn-warning btn-sm">
+
+                                ✏ تعديل
+
+                            </a>
+
+
+
+                            <a asp-action="Delete"
+                               asp-route-id="@item.ID"
+                               class="btn btn-danger btn-sm"
+                               onclick="return confirm('هل تريد حذف هذا البحث؟');">
+
+                                🗑 حذف
+
+                            </a>
+
+
+                        </td>
+
+                    }
+
+
+
+                </tr>
+
+            }
+
+
+        </tbody>
+
+
+    </table>
+
+
+</div>

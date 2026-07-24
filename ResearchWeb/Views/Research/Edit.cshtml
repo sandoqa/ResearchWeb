@@ -1,0 +1,81 @@
+﻿@model ResearchWeb.Models.Research
+
+@{
+    ViewData["Title"] = "تعديل البحث";
+}
+
+<h2 class="text-center mb-4">تعديل البحث</h2>
+
+<form asp-action="Edit" method="post">
+
+    <input type="hidden" asp-for="ID" />
+
+
+    <div class="mb-3">
+        <label class="form-label">اسم الباحث</label>
+        <input asp-for="اسم_الباحث" class="form-control" />
+    </div>
+
+
+    <div class="mb-3">
+        <label class="form-label">تاريخ الاجتماع</label>
+        <input asp-for="تاريخ_الاجتماع"
+               type="date"
+               class="form-control" />
+    </div>
+
+
+    <div class="mb-3">
+        <label class="form-label">عنوان البحث</label>
+        <input asp-for="عنوان_البحث"
+               class="form-control" />
+    </div>
+
+
+    <div class="mb-3">
+        <label class="form-label">رقم البحث</label>
+        <input asp-for="رقم_البحث"
+               class="form-control" />
+    </div>
+
+
+    <div class="mb-3">
+        <label class="form-label">رقم الاجتماع</label>
+        <input asp-for="رقم_الاجتماع"
+               class="form-control" />
+    </div>
+
+
+    <div class="mb-3">
+        <label class="form-label">نتيجة البحث</label>
+        <input asp-for="نتيجة_البحث"
+               class="form-control" />
+    </div>
+
+
+    <div class="mb-3">
+        <label class="form-label">رقم الهاتف</label>
+        <input asp-for="رقم_الهاتف"
+               class="form-control" />
+    </div>
+
+
+    <div class="mb-3">
+        <label class="form-label">توصيات اللجنة</label>
+        <textarea asp-for="توصيات_اللجنة"
+                  class="form-control"></textarea>
+    </div>
+
+
+    <button type="submit"
+            class="btn btn-primary">
+        💾 حفظ التعديل
+    </button>
+
+
+    <a asp-action="Index"
+       class="btn btn-secondary">
+        رجوع
+    </a>
+
+</form>
