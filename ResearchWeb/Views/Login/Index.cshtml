@@ -1,81 +1,216 @@
-@{
-    ViewData["Title"] = "ÊÓÌíá ÇáÏÎæá";
+ï»¿@{
+    ViewData["Title"] = "ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„";
 }
 
-<div class="container mt-5">
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
 
-    <div class="row justify-content-center">
+<head>
 
-        <div class="col-md-5">
+    <meta charset="utf-8" />
 
-            <div class="card shadow">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-                <div class="card-header bg-primary text-white text-center">
-                    <h3>
-                        äÙÇã ÇáÃÈÍÇË ÇáÚáãíÉ
-                    </h3>
+    <title>@ViewData["Title"]</title>
+
+
+    <style>
+
+        body {
+            direction: rtl;
+            font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+            background-color: #f4f6f9;
+        }
+
+
+        .login-container {
+            margin-top: 80px;
+        }
+
+
+        .card {
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+
+        .card-header {
+            padding: 20px;
+        }
+
+
+        .card-header h3 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+
+        .card-body {
+            padding: 30px;
+        }
+
+
+        label {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+
+        input {
+            height: 45px;
+            font-size: 18px;
+            text-align: right;
+        }
+
+
+        button {
+            height: 45px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+
+        .alert {
+            font-size: 17px;
+        }
+
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <div class="container login-container">
+
+
+        <div class="row justify-content-center">
+
+
+            <div class="col-md-5">
+
+
+                <div class="card shadow">
+
+
+                    <div class="card-header bg-primary text-white text-center">
+
+
+                        <h3>
+                            Ù†Ø¸Ø§Ù… Ø§Ù„Ø£Ø¨Ø­Ø§Ø« Ø§Ù„Ø¹Ù„Ù…ÙŠØ©
+                        </h3>
+
+
+                    </div>
+
+
+
+                    <div class="card-body">
+
+
+
+                        @if (ViewBag.Error != null)
+                        {
+
+                            <div class="alert alert-danger text-center">
+
+                                @ViewBag.Error
+
+                            </div>
+
+                        }
+
+
+
+                        <form method="post">
+
+
+
+                            <div class="mb-3">
+
+
+                                <label class="form-label">
+
+                                    Ø§Ø³Ù… Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù…
+
+                                </label>
+
+
+
+                                <input type="text"
+                                       name="username"
+                                       class="form-control"
+                                       autocomplete="username"
+                                       required />
+
+
+
+                            </div>
+
+
+
+
+
+                            <div class="mb-3">
+
+
+                                <label class="form-label">
+
+                                    ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ±
+
+                                </label>
+
+
+
+                                <input type="password"
+                                       name="password"
+                                       class="form-control"
+                                       autocomplete="current-password"
+                                       required />
+
+
+
+                            </div>
+
+
+
+
+
+                            <button type="submit"
+                                    class="btn btn-primary w-100">
+
+
+                                Ø¯Ø®ÙˆÙ„
+
+
+                            </button>
+
+
+
+                        </form>
+
+
+
+                    </div>
+
+
                 </div>
 
-
-                <div class="card-body">
-
-                    @if (ViewBag.Error != null)
-                    {
-                        <div class="alert alert-danger text-center">
-                            @ViewBag.Error
-                        </div>
-                    }
-
-
-                    <form method="post">
-
-                        <div class="mb-3">
-
-                            <label class="form-label">
-                                ÇÓã ÇáãÓÊÎÏã
-                            </label>
-
-                            <input type="text"
-                                   name="username"
-                                   class="form-control"
-                                   required />
-
-                        </div>
-
-
-
-                        <div class="mb-3">
-
-                            <label class="form-label">
-                                ßáãÉ ÇáãÑæÑ
-                            </label>
-
-                            <input type="password"
-                                   name="password"
-                                   class="form-control"
-                                   required />
-
-                        </div>
-
-
-
-                        <button type="submit"
-                                class="btn btn-primary w-100">
-
-                            ÏÎæá
-
-                        </button>
-
-
-                    </form>
-
-
-                </div>
 
             </div>
 
+
         </div>
+
 
     </div>
 
-</div>
+
+
+</body>
+
+</html>
