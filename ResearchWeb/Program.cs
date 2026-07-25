@@ -4,17 +4,20 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using ResearchWeb.Data;
 
-var builder = WebApplication.CreateBuilder(new WebApplicationOptions
-{
-    Args = args,
-    EnvironmentName = Environments.Production
-});
 
-
-//  ‘€Ì· «· ÿ»Ìﬁ ⁄·Ï Render »«” Œœ«„ PORT
+// √Œ– «·„‰›– „‰ Render
 var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
 
-builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+Environment.SetEnvironmentVariable(
+    "ASPNETCORE_URLS",
+    $"http://0.0.0.0:{port}"
+);
+
+
+// ≈‰‘«¡ «· ÿ»Ìﬁ
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Environment.EnvironmentName = Environments.Production;
 
 
 // ≈⁄œ«œ«  JSON
@@ -61,7 +64,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddSession();
 
 
-// ≈‰‘«¡ «· ÿ»Ìﬁ
+// »‰«¡ «· ÿ»Ìﬁ
 var app = builder.Build();
 
 
@@ -80,16 +83,14 @@ using (var scope = app.Services.CreateScope())
 }
 
 
-
-// ≈⁄œ«œ«  Production
+// „⁄«·Ã… «·√Œÿ«¡
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
 }
 
 
-
-// „Â„ ·‹ Render
+// ≈⁄œ«œ«  Render
 app.UseForwardedHeaders();
 
 
@@ -116,5 +117,5 @@ app.MapControllerRoute(
 );
 
 
-//  ‘€Ì· «· ÿ»Ìﬁ
+//  ‘€Ì· «·„Êﬁ⁄
 app.Run();
