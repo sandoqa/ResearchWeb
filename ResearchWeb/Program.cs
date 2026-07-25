@@ -3,22 +3,30 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using ResearchWeb.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 
-// ÊÍÏíÏ ãßÇä ŞÇÚÏÉ ÇáÈíÇäÇÊ
-AppDomain.CurrentDomain.SetData(
-    "DataDirectory",
-    Path.Combine(
-        Directory.GetCurrentDirectory(),
-        "App_Data"
-    )
+// ÊÍÏíÏ ãßÇä ŞÇÚÏÉ ÇáÈíÇäÇÊ SQLite
+var dbFolder = Path.Combine(
+    Directory.GetCurrentDirectory(),
+    "App_Data"
 );
 
+// ÅäÔÇÁ ÇáãÌáÏ ÅĞÇ áã íßä ãæÌæÏğÇ
+Directory.CreateDirectory(dbFolder);
+
+var dbPath = Path.Combine(
+    dbFolder,
+    "research.db"
+);
+
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(
-        builder.Configuration.GetConnectionString("DefaultConnection")
-    ));
+    options.UseSqlite($"Data Source={dbPath}")
+);
+
+
 // ÅÖÇİÉ MVC
 builder.Services.AddControllersWithViews();
 
@@ -28,6 +36,9 @@ builder.Services.AddSession();
 
 
 var app = builder.Build();
+
+
+// ÅäÔÇÁ ŞÇÚÏÉ ÇáÈíÇäÇÊ æÇáÌÏÇæá ÅĞÇ áã Êßä ãæÌæÏÉ
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider
@@ -36,6 +47,7 @@ using (var scope = app.Services.CreateScope())
     db.Database.EnsureCreated();
 }
 
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -43,11 +55,9 @@ if (!app.Environment.IsDevelopment())
 }
 
 
-// app.UseHttpsRedirection(); 
-// íãßä ÅÈŞÇÄåÇ ÅĞÇ áÏíß HTTPS
-// Ãæ ÊÚØíáåÇ ãÄŞÊğÇ ÃËäÇÁ ÇáÊÌÑÈÉ Úáì http
-
+// ÊÔÛíá ÇáãæŞÚ Îáİ Render
 app.UseForwardedHeaders();
+
 app.UseStaticFiles();
 
 app.UseRouting();
