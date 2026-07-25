@@ -10,18 +10,26 @@ var builder = WebApplication.CreateBuilder(new WebApplicationOptions
     EnvironmentName = Environments.Production
 });
 
-//  ‘€Ì· «· ÿ»Ìﬁ ⁄·Ï Render
-builder.WebHost.UseUrls("http://0.0.0.0:5000");
+//  ‘€Ì· «· ÿ»Ìﬁ ⁄·Ï Render »«” Œœ«„ PORT
+var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
+
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+
 
 builder.Configuration.Sources.Clear();
 
 builder.Configuration
-    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: false)
+    .AddJsonFile(
+        "appsettings.json",
+        optional: false,
+        reloadOnChange: false
+    )
     .AddJsonFile(
         $"appsettings.{builder.Environment.EnvironmentName}.json",
         optional: true,
         reloadOnChange: false
     );
+
 
 //  ÕœÌœ „ﬂ«‰ ﬁ«⁄œ… «·»Ì«‰«  SQLite
 var dbPath = Path.Combine(
@@ -30,21 +38,29 @@ var dbPath = Path.Combine(
     "research.db"
 );
 
-// «· √ﬂœ „‰ ÊÃÊœ «·„Ã·œ
-Directory.CreateDirectory(
-    Path.GetDirectoryName(dbPath)!
-);
+
+// «· √ﬂœ „‰ ÊÃÊœ „Ã·œ App_Data
+var dbFolder = Path.GetDirectoryName(dbPath);
+
+if (!string.IsNullOrEmpty(dbFolder))
+{
+    Directory.CreateDirectory(dbFolder);
+}
+
 
 // —»ÿ SQLite
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite($"Data Source={dbPath}")
 );
 
-// MVC
+
+// ≈÷«›… MVC
 builder.Services.AddControllersWithViews();
 
-// Session
+
+//  ›⁄Ì· Session
 builder.Services.AddSession();
+
 
 
 var app = builder.Build();
@@ -65,6 +81,7 @@ using (var scope = app.Services.CreateScope())
 }
 
 
+
 // „⁄«·Ã… «·√Œÿ«¡ ›Ì Production
 if (!app.Environment.IsDevelopment())
 {
@@ -80,6 +97,8 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+
+//  ‘€Ì· Session
 app.UseSession();
 
 app.UseAuthorization();
