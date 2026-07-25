@@ -10,12 +10,14 @@ var builder = WebApplication.CreateBuilder(new WebApplicationOptions
     EnvironmentName = Environments.Production
 });
 
+
 //  ‘€Ì· «· ÿ»Ìﬁ ⁄·Ï Render »«” Œœ«„ PORT
 var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
 
 builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
 
+// ≈⁄œ«œ«  JSON
 builder.Configuration.Sources.Clear();
 
 builder.Configuration
@@ -31,7 +33,7 @@ builder.Configuration
     );
 
 
-//  ÕœÌœ „ﬂ«‰ ﬁ«⁄œ… «·»Ì«‰«  SQLite
+// „”«— ﬁ«⁄œ… «·»Ì«‰«  SQLite
 var dbPath = Path.Combine(
     Directory.GetCurrentDirectory(),
     "App_Data",
@@ -39,13 +41,10 @@ var dbPath = Path.Combine(
 );
 
 
-// «· √ﬂœ „‰ ÊÃÊœ „Ã·œ App_Data
-var dbFolder = Path.GetDirectoryName(dbPath);
-
-if (!string.IsNullOrEmpty(dbFolder))
-{
-    Directory.CreateDirectory(dbFolder);
-}
+// ≈‰‘«¡ „Ã·œ ﬁ«⁄œ… «·»Ì«‰« 
+Directory.CreateDirectory(
+    Path.GetDirectoryName(dbPath)!
+);
 
 
 // —»ÿ SQLite
@@ -54,19 +53,19 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 );
 
 
-// ≈÷«›… MVC
+// MVC
 builder.Services.AddControllersWithViews();
 
 
-//  ›⁄Ì· Session
+// Session
 builder.Services.AddSession();
 
 
-
+// ≈‰‘«¡ «· ÿ»Ìﬁ
 var app = builder.Build();
 
 
-// «Œ »«— ﬁ«⁄œ… «·»Ì«‰«  Ê≈ŸÂ«— ⁄œœ «·„” Œœ„Ì‰ ›Ì Render Logs
+// ≈‰‘«¡ ﬁ«⁄œ… «·»Ì«‰«  Ê›Õ’ «·„” Œœ„Ì‰
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider
@@ -82,33 +81,40 @@ using (var scope = app.Services.CreateScope())
 
 
 
-// „⁄«·Ã… «·√Œÿ«¡ ›Ì Production
+// ≈⁄œ«œ«  Production
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
 }
 
 
-// ≈⁄œ«œ«  Render
+
+// „Â„ ·‹ Render
 app.UseForwardedHeaders();
 
+
+// «·„·›«  «·À«» …
 app.UseStaticFiles();
 
+
+// Routing
 app.UseRouting();
 
 
-//  ‘€Ì· Session
+// Session
 app.UseSession();
 
+
+// Authorization
 app.UseAuthorization();
 
 
-// «·„”«— «·«› —«÷Ì
+// «·’›Õ… «·«› —«÷Ì…
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Login}/{action=Index}/{id?}"
 );
 
 
+//  ‘€Ì· «· ÿ»Ìﬁ
 app.Run();
