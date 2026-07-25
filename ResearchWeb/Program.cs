@@ -9,39 +9,48 @@ var builder = WebApplication.CreateBuilder(new WebApplicationOptions
     Args = args,
     EnvironmentName = Environments.Production
 });
+
+// ÊÔÛíá ÇáÊØÈíŞ Úáì Render
+builder.WebHost.UseUrls("http://0.0.0.0:5000");
+
 builder.Configuration.Sources.Clear();
 
 builder.Configuration
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: false)
-    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: false);
+    .AddJsonFile(
+        $"appsettings.{builder.Environment.EnvironmentName}.json",
+        optional: true,
+        reloadOnChange: false
+    );
 
 // ÊÍÏíÏ ãßÇä ŞÇÚÏÉ ÇáÈíÇäÇÊ SQLite
-var dbFolder = Path.Combine(
-    Directory.GetCurrentDirectory(),
-    "App_Data"
-);
-
-// ÅäÔÇÁ ÇáãÌáÏ ÅĞÇ áã íßä ãæÌæÏğÇ
-Directory.CreateDirectory(dbFolder);
-
 var dbPath = Path.Combine(
-    dbFolder,
+    Directory.GetCurrentDirectory(),
+    "App_Data",
     "research.db"
 );
 
+// ÇáÊÃßÏ ãä æÌæÏ ÇáãÌáÏ
+Directory.CreateDirectory(
+    Path.GetDirectoryName(dbPath)!
+);
+
+// ÑÈØ SQLite
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite($"Data Source={dbPath}")
 );
 
-// ÅÖÇİÉ MVC
+// MVC
 builder.Services.AddControllersWithViews();
 
-// ÊİÚíá Session
+// Session
 builder.Services.AddSession();
+
 
 var app = builder.Build();
 
-// ÅäÔÇÁ ŞÇÚÏÉ ÇáÈíÇäÇÊ æÇáÌÏÇæá ÅĞÇ áã Êßä ãæÌæÏÉ
+
+// ÇÎÊÈÇÑ ŞÇÚÏÉ ÇáÈíÇäÇÊ æÅÙåÇÑ ÚÏÏ ÇáãÓÊÎÏãíä İí Render Logs
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider
@@ -49,33 +58,38 @@ using (var scope = app.Services.CreateScope())
 
     db.Database.EnsureCreated();
 
-    // ØÈÇÚÉ ÚÏÏ ÇáãÓÊÎÏãíä İí ÓÌá Render
     Console.WriteLine("=================================");
+    Console.WriteLine($"Database Path = {dbPath}");
     Console.WriteLine($"Users count = {db.Users.Count()}");
     Console.WriteLine("=================================");
 }
 
+
+// ãÚÇáÌÉ ÇáÃÎØÇÁ İí Production
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
 
-// ÊÔÛíá ÇáãæŞÚ Îáİ Render
+
+// ÅÚÏÇÏÇÊ Render
 app.UseForwardedHeaders();
 
 app.UseStaticFiles();
 
 app.UseRouting();
 
-// ÊÔÛíá Session
 app.UseSession();
 
 app.UseAuthorization();
 
+
+// ÇáãÓÇÑ ÇáÇİÊÑÇÖí
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Login}/{action=Index}/{id?}"
 );
+
 
 app.Run();
