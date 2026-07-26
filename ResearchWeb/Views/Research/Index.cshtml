@@ -1,4 +1,6 @@
-﻿@using Microsoft.AspNetCore.Http
+﻿@model IEnumerable<ResearchWeb.Models.Research2026>
+
+@using Microsoft.AspNetCore.Http
 
 @{
     ViewData["Title"] = "الأبحاث العلمية 2026";
@@ -7,9 +9,40 @@
 }
 
 
+<style>
+
+    .blink-red td {
+        animation: blinkRed 1s infinite;
+        font-weight: bold;
+    }
+
+
+    @@keyframes blinkRed {
+
+        0% {
+            background-color: white;
+            color: black;
+        }
+
+        50% {
+            background-color: red;
+            color: white;
+        }
+
+        100% {
+            background-color: white;
+            color: black;
+        }
+    }
+
+</style>
+
+
+
 <h2 class="text-center mb-4">
     الأبحاث العلمية 2026
 </h2>
+
 
 
 
@@ -26,9 +59,34 @@
 
 
 
+<a asp-controller="Research"
+   asp-action="Duplicates"
+   class="btn btn-danger mb-3">
+
+    🔁 فحص الأبحاث المكررة
+
+</a>
+
+
+
+<a asp-controller="Research"
+   asp-action="ByMeeting"
+   class="btn btn-info mb-3">
+
+    📅 أبحاث حسب رقم اللجنة
+
+</a>
+
+
+
+
+
+
+
 <form method="get" class="mb-3">
 
     <div class="input-group">
+
 
         <input type="text"
                name="search"
@@ -52,9 +110,13 @@
 
         </a>
 
+
     </div>
 
 </form>
+
+
+
 
 
 
@@ -62,10 +124,12 @@
 
     عدد الأبحاث:
     <strong>
-        @Model.Count
+        @Model.Count()
     </strong>
 
 </div>
+
+
 
 
 
@@ -90,7 +154,7 @@
 
                 <th>رقم البحث</th>
 
-                <th>رقم الاجتماع</th>
+                <th>رقم اللجنة</th>
 
                 <th>نتيجة البحث</th>
 
@@ -104,10 +168,11 @@
                     <th>إجراءات</th>
                 }
 
-
             </tr>
 
         </thead>
+
+
 
 
 
@@ -117,7 +182,12 @@
             @foreach (var item in Model)
             {
 
-                <tr>
+                var rowClass = item.نتيجة_البحث?.Trim() == "1"
+                ? "blink-red"
+                : "";
+
+
+                <tr class="@rowClass">
 
 
                     <td>
@@ -131,8 +201,10 @@
 
 
                     <td>
-                        @(item.تاريخ_الاجتماع?.ToString("dd/MM/yyyy"))
-                    </td>
+                        @(item.تاريخ_الاجتماع.HasValue
+                                            ? item.تاريخ_الاجتماع.Value.ToString("dd/MM/yyyy")
+                                            : "")
+                </td>
 
 
                     <td>
@@ -166,11 +238,12 @@
 
 
 
-                    @if (role == "Admin")
+
+
+                @if (role == "Admin")
                     {
 
                         <td>
-
 
                             <a asp-action="Edit"
                                asp-route-id="@item.ID"

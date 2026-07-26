@@ -1,0 +1,115 @@
+﻿@model IEnumerable<ResearchWeb.Models.Research2026>
+
+@{
+    ViewData["Title"] = "الأبحاث المكررة";
+}
+
+
+<h2 class="text-center mb-4">
+    🔁 الأبحاث المكررة
+</h2>
+
+
+<div class="alert alert-info text-center">
+
+    عدد الأبحاث المكررة:
+    <strong>
+        @Model.Count()
+    </strong>
+
+</div>
+
+
+
+<div class="table-responsive">
+
+
+    <table class="table table-bordered table-striped table-hover text-center">
+
+
+        <thead class="table-dark">
+
+            <tr>
+
+                <th>ID</th>
+
+                <th>اسم الباحث</th>
+
+                <th>عنوان البحث</th>
+
+                <th>رقم البحث</th>
+
+                <th>رقم الاجتماع</th>
+
+                <th>نتيجة البحث</th>
+
+            </tr>
+
+        </thead>
+
+
+
+        <tbody>
+
+
+            @foreach (var item in Model)
+            {
+
+                <tr>
+
+                    <td>
+                        @item.ID
+                    </td>
+
+
+                    <td>
+                        @item.اسم_الباحث
+                    </td>
+
+
+                    <td>
+                        @item.عنوان_البحث
+                    </td>
+
+
+                    <td>
+                        @item.رقم_البحث
+                    </td>
+
+
+                    <td>
+                        @item.رقم_الاجتماع
+                    </td>
+
+
+                    <td>
+                        @item.نتيجة_البحث
+                    </td>
+
+
+                </tr>
+
+            }
+
+
+        </tbody>
+
+
+    </table>
+
+
+</div>
+
+
+
+<div class="text-center mt-4">
+
+    <a asp-controller="Research"
+       asp-action="Index"
+       class="btn btn-primary">
+
+        ⬅ العودة إلى الأبحاث
+
+    </a>
+
+</div>

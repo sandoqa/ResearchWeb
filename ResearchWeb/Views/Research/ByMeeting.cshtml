@@ -1,0 +1,174 @@
+﻿@model IEnumerable<ResearchWeb.Models.Research2026>
+
+@{
+    ViewData["Title"] = "الأبحاث حسب رقم اللجنة";
+}
+
+
+<h2 class="text-center mb-4">
+    📅 الأبحاث حسب رقم اللجنة
+</h2>
+
+
+
+<form method="get" asp-action="ByMeeting" class="mb-4">
+
+    <div class="input-group">
+
+
+        <input type="text"
+               name="meetingNumber"
+               value="@ViewBag.MeetingNumber"
+               class="form-control"
+               placeholder="أدخل رقم اللجنة (رقم الاجتماع)" />
+
+
+        <button class="btn btn-primary"
+                type="submit">
+
+            🔍 عرض الأبحاث
+
+        </button>
+
+
+    </div>
+
+</form>
+
+
+
+
+
+@if (Model != null && Model.Any())
+{
+
+    <div class="alert alert-success text-center">
+
+        عدد الأبحاث في اللجنة:
+
+        <strong>
+            @Model.Count()
+        </strong>
+
+    </div>
+
+
+
+
+    <div class="table-responsive">
+
+
+        <table class="table table-bordered table-striped table-hover text-center">
+
+
+            <thead class="table-dark">
+
+                <tr>
+
+                    <th>ID</th>
+
+                    <th>اسم الباحث</th>
+
+                    <th>عنوان البحث</th>
+
+                    <th>رقم البحث</th>
+
+                    <th>رقم اللجنة</th>
+
+                    <th>نتيجة البحث</th>
+
+                    <th>تاريخ الاجتماع</th>
+
+                </tr>
+
+
+            </thead>
+
+
+
+            <tbody>
+
+
+                @foreach (var item in Model)
+                {
+
+                    <tr>
+
+                        <td>
+                            @item.ID
+                        </td>
+
+
+                        <td>
+                            @item.اسم_الباحث
+                        </td>
+
+
+                        <td>
+                            @item.عنوان_البحث
+                        </td>
+
+
+                        <td>
+                            @item.رقم_البحث
+                        </td>
+
+
+                        <td>
+                            @item.رقم_الاجتماع
+                        </td>
+
+
+                        <td>
+                            @item.نتيجة_البحث
+                        </td>
+
+
+                        <td>
+                            @(item.تاريخ_الاجتماع.HasValue
+                                                ? item.تاريخ_الاجتماع.Value.ToString("dd/MM/yyyy")
+                                                : "")
+                </td>
+
+
+                    </tr>
+
+                        }
+
+
+            </tbody>
+
+
+        </table>
+
+
+    </div>
+
+}
+else
+{
+
+    <div class="alert alert-warning text-center">
+
+        لا توجد أبحاث لهذه اللجنة
+
+    </div>
+
+}
+
+
+
+
+<div class="text-center mt-4">
+
+
+    <a asp-controller="Research"
+       asp-action="Index"
+       class="btn btn-secondary">
+
+        ⬅ العودة إلى الأبحاث
+
+    </a>
+
+
+</div>

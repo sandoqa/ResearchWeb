@@ -1,74 +1,138 @@
-﻿@{
+﻿@model IEnumerable<ResearchWeb.Models.Research2026>
+
+@{
     ViewData["Title"] = "لوحة التحكم";
 }
 
 
-<div class="container mt-5">
 
-    <h1 class="text-center">
-        لوحة التحكم
-    </h1>
+<style>
+
+    .committee-bar {
+        background-color: #0d6efd;
+        color: white;
+        overflow: hidden;
+        white-space: nowrap;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 25px;
+        direction: rtl;
+    }
+
+    .committee-text {
+        display: inline-block;
+        animation: committeeMove 25s linear infinite;
+        font-size: 18px;
+        font-weight: bold;
+    }
 
 
-    <div class="card mt-4 shadow">
+    @@keyframes committeeMove {
 
-        <div class="card-body text-center">
+        from {
+            transform: translateX(-100%);
+        }
 
-            <h3>
-                مرحباً @ViewBag.Username
-            </h3>
+        to {
+            transform: translateX(100%);
+        }
+    }
 
-            <p>
-                الصلاحية:
-                <b>@ViewBag.Role</b>
-            </p>
+</style>
 
-        </div>
+
+
+<h2 class="text-center mb-4">
+
+    📊 لوحة الإحصائيات
+
+</h2>
+
+
+
+<!-- شريط أعضاء اللجنة -->
+
+<div class="committee-bar">
+
+    <div class="committee-text">
+
+
+        👥 أعضاء لجنة أخلاقيات البحث العلمي :
+
+        رئيس اللجنة: د. عاطف لي نمورة
+
+        |
+
+        مقرر اللجنة: السيد محمود صندوقة
+
+        |
+
+        استشاري جراحة عامة: د. باسم بدوان
+
+        |
+
+        استشاري مختبرات: د. جمانة النحال
+
+        |
+
+        الصيدلانية: ديانا عياد
+
+        |
+
+        استشاري أمراض باطنية: د. يوسف قديمات
+
+        |
+
+        المساعد للشؤون الطبية والفنية: د. مؤيد القضاة
+
+        |
+
+        أخصائي طب الأطفال: د. ناصر الدين أبو لحية
+
+        |
+
+        مدير مديرية الجودة: د. بشار النسور
+
 
     </div>
 
+</div>
 
 
-    <!-- الإحصائيات -->
-
-    <div class="row mt-4">
 
 
-        <div class="col-md-4">
 
-            <div class="card shadow text-center">
+
+<div class="container">
+
+
+
+
+
+    <!-- البطاقات -->
+
+    <div class="row g-4">
+
+
+
+        <div class="col-md-3">
+
+            <div class="card text-center shadow">
 
                 <div class="card-body">
 
-                    <h3>
+
+                    <h5>
                         📚 عدد الأبحاث
-                    </h3>
-
-                    <h1>
-                        @ViewBag.ResearchCount
-                    </h1>
-
-                </div>
-
-            </div>
-
-        </div>
+                    </h5>
 
 
+                    <h2 class="text-primary">
 
-        <div class="col-md-4">
-
-            <div class="card shadow text-center">
-
-                <div class="card-body">
-
-                    <h3>
-                        📅 الابحاث العلمية 2026
-                    </h3>
-
-                    <h1>
                         @ViewBag.Research2026Count
-                    </h1>
+
+                    </h2>
+
 
                 </div>
 
@@ -78,23 +142,163 @@
 
 
 
-        <div class="col-md-4">
 
-            <div class="card shadow text-center">
+
+
+        <div class="col-md-3">
+
+            <div class="card text-center shadow">
 
                 <div class="card-body">
 
-                    <h3>
-                        👥 عدد المستخدمين
-                    </h3>
 
-                    <h1>
+                    <h5>
+                        👨‍🔬 عدد الباحثين
+                    </h5>
+
+
+                    <h2 class="text-success">
+
+                        @ViewBag.ResearchersCount
+
+                    </h2>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+
+
+
+        <div class="col-md-3">
+
+            <div class="card text-center shadow">
+
+                <div class="card-body">
+
+
+                    <h5>
+                        📅 عدد الاجتماعات
+                    </h5>
+
+
+                    <h2 class="text-warning">
+
+                        @ViewBag.MeetingsCount
+
+                    </h2>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+
+
+
+
+        <div class="col-md-3">
+
+            <div class="card text-center shadow">
+
+                <div class="card-body">
+
+
+                    <h5>
+                        👥 المستخدمون
+                    </h5>
+
+
+                    <h2 class="text-danger">
+
                         @ViewBag.UsersCount
-                    </h1>
+
+                    </h2>
+
 
                 </div>
 
             </div>
+
+        </div>
+
+
+
+    </div>
+
+
+
+
+
+
+
+    <hr class="my-5" />
+
+
+
+
+
+
+
+    <!-- معلومات المستخدم -->
+
+
+    <div class="text-center mb-5">
+
+
+        <h4>
+
+            مرحباً @ViewBag.Username
+
+        </h4>
+
+
+        <p>
+
+            الصلاحية:
+
+            @ViewBag.Role
+
+        </p>
+
+
+    </div>
+
+
+
+
+
+
+
+    <!-- الرسم البياني -->
+
+
+    <h3 class="text-center mb-4">
+
+        📊 عدد الأبحاث حسب رقم الاجتماع (اللجنة)
+
+    </h3>
+
+
+
+
+    <div class="row justify-content-center">
+
+
+        <div class="col-md-8">
+
+
+            <canvas id="meetingChart"></canvas>
+
 
         </div>
 
@@ -105,83 +309,299 @@
 
 
 
-    <!-- روابط النظام -->
-
-    <div class="row mt-4">
 
 
-        <div class="col-md-4">
 
-            <div class="card text-center shadow">
-
-                <div class="card-body">
-
-                    <h4>
-                        📚 الأبحاث
-                    </h4>
-
-                    <a class="btn btn-primary"
-                       href="/Research">
-                        فتح الأبحاث
-                    </a>
-
-                </div>
-
-            </div>
-
-        </div>
+    <hr class="my-5" />
 
 
 
 
-        <div class="col-md-4">
 
-            <div class="card text-center shadow">
 
-                <div class="card-body">
 
-                    <h4>
-                        📅 الابحاث العلمية 2026
-                    </h4>
+    <h3 class="text-center mb-4">
 
-                    <a class="btn btn-info"
-                       href="/Research/Index">
-                        فتح أبحاث 2026
-                    </a>
+        📋 آخر الأبحاث المضافة
 
-                </div>
-
-            </div>
-
-        </div>
+    </h3>
 
 
 
 
-        <div class="col-md-4">
 
-            <div class="card text-center shadow">
 
-                <div class="card-body">
 
-                    <h4>
-                        👤 المستخدمون
-                    </h4>
+    <div class="table-responsive">
 
-                    <a class="btn btn-success"
-                       href="#">
-                        الإدارة
-                    </a>
 
-                </div>
+        <table class="table table-bordered table-striped table-hover text-center">
 
-            </div>
 
-        </div>
+
+            <thead class="table-dark">
+
+
+                <tr>
+
+
+                    <th>ID</th>
+
+                    <th>اسم الباحث</th>
+
+                    <th>تاريخ الاجتماع</th>
+
+                    <th>عنوان البحث</th>
+
+                    <th>رقم البحث</th>
+
+                    <th>رقم الاجتماع</th>
+
+                    <th>نتيجة البحث</th>
+
+
+                </tr>
+
+
+            </thead>
+
+
+
+
+
+            <tbody>
+
+
+                @foreach (var item in Model)
+
+                {
+
+
+                    <tr>
+
+
+                        <td>
+                            @item.ID
+                        </td>
+
+
+                        <td>
+                            @item.اسم_الباحث
+                        </td>
+
+
+                        <td>
+
+                            @(item.تاريخ_الاجتماع.HasValue
+                                                    ? item.تاريخ_الاجتماع.Value.ToString("dd/MM/yyyy")
+                                                    : "")
+
+                    </td>
+
+
+
+                        <td>
+                            @item.عنوان_البحث
+                        </td>
+
+
+
+                        <td>
+                            @item.رقم_البحث
+                        </td>
+
+
+
+                        <td>
+                            @item.رقم_الاجتماع
+                        </td>
+
+
+
+                        <td>
+                            @item.نتيجة_البحث
+                        </td>
+
+
+                    </tr>
+
+
+                                }
+
+
+
+            </tbody>
+
+
+
+        </table>
 
 
     </div>
+
+
+
+
+
+
+
+    <div class="text-center mt-4">
+
+
+        <a asp-controller="Research"
+           asp-action="Index"
+           class="btn btn-primary btn-lg">
+
+
+            📚 عرض جميع الأبحاث
+
+
+        </a>
+
+
+    </div>
+
+
 
 
 
 </div>
+
+
+
+
+
+
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+
+
+
+<script>
+
+
+    const labels =
+
+    @Html.Raw(ViewBag.MeetingLabels ?? "[]");
+
+
+
+    const values =
+
+    @Html.Raw(ViewBag.MeetingValues ?? "[]");
+
+
+
+
+
+    const ctx =
+
+    document.getElementById('meetingChart');
+
+
+
+
+
+    new Chart(ctx,
+
+    {
+
+
+    type:'bar',
+
+
+    data:
+
+    {
+
+
+    labels:labels,
+
+
+    datasets:
+
+    [
+
+    {
+
+    label:'عدد الأبحاث',
+
+    data:values
+
+
+    }
+
+    ]
+
+
+    },
+
+
+
+
+    options:
+
+    {
+
+
+    responsive:true,
+
+
+    scales:
+
+    {
+
+
+    y:
+
+    {
+
+
+    beginAtZero:true,
+
+
+    ticks:
+    {
+
+    precision:0
+
+    }
+
+
+    }
+
+
+    },
+
+
+
+    plugins:
+
+    {
+
+
+    legend:
+
+    {
+
+    position:'bottom'
+
+    }
+
+
+    }
+
+
+    }
+
+
+
+    });
+
+
+
+</script>
