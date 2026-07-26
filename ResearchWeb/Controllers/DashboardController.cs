@@ -157,6 +157,10 @@ namespace ResearchWeb.Controllers
             return View(latestResearches);
 
         }
+        public IActionResult Committee()
+        {
+            return View();
+        }
 
     }
 }

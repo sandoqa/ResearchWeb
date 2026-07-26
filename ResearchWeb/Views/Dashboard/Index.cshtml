@@ -5,8 +5,15 @@
 }
 
 
-
 <style>
+    .committee-button {
+        color: red !important;
+        font-weight: bold;
+    }
+    .committee-title {
+        color: red;
+        font-weight: bold;
+    }
 
     .committee-bar {
         background-color: #0d6efd;
@@ -19,18 +26,20 @@
         direction: rtl;
     }
 
+
     .committee-text {
         display: inline-block;
-        animation: committeeMove 25s linear infinite;
+        animation: committeeMove 35s linear infinite;
         font-size: 18px;
         font-weight: bold;
+        transform: translateX(0);
     }
 
 
     @@keyframes committeeMove {
 
         from {
-            transform: translateX(-100%);
+            transform: translateX(0);
         }
 
         to {
@@ -38,72 +47,133 @@
         }
     }
 
+
+    /* تحسين الهاتف */
+
+    .card {
+        border-radius: 15px;
+    }
+
+
+    table {
+        font-size: 15px;
+    }
+
+
+    @@media(max-width:768px) {
+
+        h2 {
+            font-size: 22px;
+        }
+
+
+        .committee-text {
+            font-size: 15px;
+        }
+
+
+        table {
+            font-size: 12px;
+        }
+    }
+
 </style>
 
 
 
-<h2 class="text-center mb-4">
-
-    📊 لوحة الإحصائيات
-
-</h2>
+<div class="container">
 
 
+    <h2 class="text-center mb-3">
+        <div class="text-center mb-3">
+            <img src="~/images/pic.jfif"
+                 alt="شعار المستشفى"
+                 style="width:220px; height:auto;">
+        </div>
 
-<!-- شريط أعضاء اللجنة -->
 
-<div class="committee-bar">
+        <h2 class="text-center mb-4">
+         
+        📊 لوحة الإحصائيات
 
-    <div class="committee-text">
+    </h2>
 
 
-        👥 أعضاء لجنة أخلاقيات البحث العلمي :
 
-        رئيس اللجنة: د. عاطف لي نمورة
+    <!-- زر أعضاء اللجنة في أعلى الصفحة -->
 
-        |
+    <div class="text-center mb-4">
 
-        مقرر اللجنة: السيد محمود صندوقة
 
-        |
+        <a asp-controller="Dashboard"
+           asp-action="Committee"
+           class="btn btn-info btn-lg w-100 committee-button">
 
-        استشاري جراحة عامة: د. باسم بدوان
+            👥 أعضاء لجنة أخلاقيات البحث العلمي
 
-        |
-
-        استشاري مختبرات: د. جمانة النحال
-
-        |
-
-        الصيدلانية: ديانا عياد
-
-        |
-
-        استشاري أمراض باطنية: د. يوسف قديمات
-
-        |
-
-        المساعد للشؤون الطبية والفنية: د. مؤيد القضاة
-
-        |
-
-        أخصائي طب الأطفال: د. ناصر الدين أبو لحية
-
-        |
-
-        مدير مديرية الجودة: د. بشار النسور
+        </a>
 
 
     </div>
 
-</div>
 
 
 
 
+    <!-- شريط أعضاء اللجنة -->
+
+    <div class="committee-bar">
 
 
-<div class="container">
+        <div class="committee-text">
+
+
+            <span class="committee-title">
+                👥 أعضاء لجنة أخلاقيات البحث العلمي :
+            </span>
+
+            |
+
+            رئيس اللجنة: د. عاطف لي نمورة
+
+            |
+
+            مقرر اللجنة: السيد محمود صندوقة
+
+            |
+
+            استشاري جراحة عامة: د. باسم بدوان
+
+            |
+
+            استشاري مختبرات: د. جمانة النحال
+
+            |
+
+            الصيدلانية: ديانا عياد
+
+            |
+
+            استشاري أمراض باطنية: د. يوسف قديمات
+
+            |
+
+            المساعد للشؤون الطبية والفنية: د. مؤيد القضاة
+
+            |
+
+            أخصائي طب الأطفال: د. ناصر الدين أبو لحية
+
+            |
+
+            مدير مديرية الجودة: د. بشار النسور
+
+
+        </div>
+
+
+    </div>
+
 
 
 
@@ -111,13 +181,15 @@
 
     <!-- البطاقات -->
 
+
     <div class="row g-4">
 
 
 
-        <div class="col-md-3">
+        <div class="col-12 col-md-3">
 
             <div class="card text-center shadow">
+
 
                 <div class="card-body">
 
@@ -136,7 +208,9 @@
 
                 </div>
 
+
             </div>
+
 
         </div>
 
@@ -144,10 +218,10 @@
 
 
 
-
-        <div class="col-md-3">
+        <div class="col-12 col-md-3">
 
             <div class="card text-center shadow">
+
 
                 <div class="card-body">
 
@@ -166,7 +240,9 @@
 
                 </div>
 
+
             </div>
+
 
         </div>
 
@@ -174,10 +250,10 @@
 
 
 
-
-        <div class="col-md-3">
+        <div class="col-12 col-md-3">
 
             <div class="card text-center shadow">
+
 
                 <div class="card-body">
 
@@ -196,7 +272,9 @@
 
                 </div>
 
+
             </div>
+
 
         </div>
 
@@ -204,11 +282,10 @@
 
 
 
-
-
-        <div class="col-md-3">
+        <div class="col-12 col-md-3">
 
             <div class="card text-center shadow">
+
 
                 <div class="card-body">
 
@@ -227,7 +304,9 @@
 
                 </div>
 
+
             </div>
+
 
         </div>
 
@@ -236,17 +315,7 @@
     </div>
 
 
-
-
-
-
-
     <hr class="my-5" />
-
-
-
-
-
 
 
     <!-- معلومات المستخدم -->
@@ -265,21 +334,13 @@
         <p>
 
             الصلاحية:
-
             @ViewBag.Role
 
         </p>
 
 
     </div>
-
-
-
-
-
-
-
-    <!-- الرسم البياني -->
+    <!-- الرسم البياني حسب رقم الاجتماع -->
 
 
     <h3 class="text-center mb-4">
@@ -290,11 +351,10 @@
 
 
 
-
     <div class="row justify-content-center">
 
 
-        <div class="col-md-8">
+        <div class="col-12 col-md-8">
 
 
             <canvas id="meetingChart"></canvas>
@@ -309,12 +369,7 @@
 
 
 
-
-
-
     <hr class="my-5" />
-
-
 
 
 
@@ -330,13 +385,10 @@
 
 
 
-
-
     <div class="table-responsive">
 
 
         <table class="table table-bordered table-striped table-hover text-center">
-
 
 
             <thead class="table-dark">
@@ -368,14 +420,12 @@
 
 
 
-
             <tbody>
 
 
                 @foreach (var item in Model)
 
                 {
-
 
                     <tr>
 
@@ -388,6 +438,7 @@
                         <td>
                             @item.اسم_الباحث
                         </td>
+
 
 
                         <td>
@@ -425,13 +476,10 @@
 
                     </tr>
 
-
                                 }
 
 
-
             </tbody>
-
 
 
         </table>
@@ -443,25 +491,19 @@
 
 
 
-
-
     <div class="text-center mt-4">
 
 
         <a asp-controller="Research"
            asp-action="Index"
-           class="btn btn-primary btn-lg">
-
+           class="btn btn-primary btn-lg w-100">
 
             📚 عرض جميع الأبحاث
-
 
         </a>
 
 
     </div>
-
-
 
 
 
@@ -471,13 +513,10 @@
 
 
 
-
-
+<!-- Chart.js -->
 
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-
 
 
 
@@ -496,20 +535,19 @@
 
 
 
-
-
     const ctx =
 
     document.getElementById('meetingChart');
 
 
 
+    if(ctx)
+    {
 
 
     new Chart(ctx,
 
     {
-
 
     type:'bar',
 
@@ -532,7 +570,6 @@
 
     data:values
 
-
     }
 
     ]
@@ -542,13 +579,14 @@
 
 
 
-
     options:
 
     {
 
-
     responsive:true,
+
+
+    maintainAspectRatio:false,
 
 
     scales:
@@ -560,7 +598,6 @@
 
     {
 
-
     beginAtZero:true,
 
 
@@ -570,7 +607,6 @@
     precision:0
 
     }
-
 
     }
 
@@ -588,6 +624,7 @@
 
     {
 
+
     position:'bottom'
 
     }
@@ -599,8 +636,10 @@
     }
 
 
-
     });
+
+
+    }
 
 
 
