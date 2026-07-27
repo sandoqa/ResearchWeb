@@ -1,0 +1,36 @@
+﻿@{
+    ViewData["Title"] = "استيراد من Access";
+}
+
+<h2 class="text-center mb-4">
+    📥 استيراد الأبحاث من Access
+</h2>
+
+<form asp-action="ImportAccess"
+      method="post"
+      enctype="multipart/form-data">
+
+    <div class="mb-3">
+        <label class="form-label">
+            اختر قاعدة Access
+        </label>
+
+        <input type="file"
+               name="accessFile"
+               class="form-control"
+               accept=".mdb,.accdb" />
+    </div>
+
+    <button type="submit"
+            class="btn btn-primary">
+        بدء الاستيراد
+    </button>
+
+</form>
+
+@if (ViewBag.Message != null)
+{
+    <div class="alert alert-success mt-3">
+        @ViewBag.Message
+    </div>
+}
