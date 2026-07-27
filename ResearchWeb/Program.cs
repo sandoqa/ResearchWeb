@@ -12,7 +12,7 @@ using ResearchWeb.Data;
 // =====================================
 Environment.SetEnvironmentVariable(
     "DOTNET_USE_POLLING_FILE_WATCHER",
-    "false"
+    "true"
 );
 
 
