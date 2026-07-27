@@ -1,8 +1,9 @@
 using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.EntityFrameworkCore;
 using ResearchWeb.Data;
+using ResearchWeb.Models;
 
 
 // √Œ– «·„‰›– „‰ Render
@@ -78,6 +79,7 @@ using (var scope = app.Services.CreateScope())
 
     Console.WriteLine("=================================");
     Console.WriteLine($"Database Path = {dbPath}");
+    Console.WriteLine($"Research count = {db.Set<Research>().Count()}");
     Console.WriteLine($"Users count = {db.Users.Count()}");
     Console.WriteLine("=================================");
 }
