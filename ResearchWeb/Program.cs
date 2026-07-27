@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -88,6 +89,26 @@ builder.Services.AddControllersWithViews();
 // Session
 // =====================================
 builder.Services.AddSession();
+
+
+// =====================================
+// Data Protection Keys
+// Persistent Session Cookies
+// =====================================
+var keysFolder = Path.Combine(
+    Directory.GetCurrentDirectory(),
+    "App_Data",
+    "DataProtectionKeys"
+);
+
+
+Directory.CreateDirectory(keysFolder);
+
+
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(
+        new DirectoryInfo(keysFolder)
+    );
 
 
 // =====================================
