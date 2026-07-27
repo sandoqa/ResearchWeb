@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ResearchWeb.Data;
+using ResearchWeb.Models;
 using System.Text.Json;
 
 namespace ResearchWeb.Controllers
@@ -25,6 +26,28 @@ namespace ResearchWeb.Controllers
 
             ViewBag.Role =
                 HttpContext.Session.GetString("Role");
+
+
+
+            // ==========================
+            // تسجيل زيارة جديدة
+            // ==========================
+
+            var visitor = new Visitor
+            {
+                VisitDate = DateTime.Now
+            };
+
+
+            _context.Visitors.Add(visitor);
+            _context.SaveChanges();
+
+
+
+            // عدد الزوار
+            ViewBag.VisitorsCount =
+                _context.Visitors.Count();
+
 
 
 
@@ -105,7 +128,6 @@ namespace ResearchWeb.Controllers
 
 
 
-
             // ==========================
             // رسم الأبحاث حسب رقم الاجتماع
             // ==========================
@@ -141,8 +163,6 @@ namespace ResearchWeb.Controllers
 
 
 
-
-
             // آخر 10 أبحاث
 
             var latestResearches =
@@ -153,10 +173,13 @@ namespace ResearchWeb.Controllers
 
 
 
-
             return View(latestResearches);
 
         }
+
+
+
+
         public IActionResult Committee()
         {
             return View();
