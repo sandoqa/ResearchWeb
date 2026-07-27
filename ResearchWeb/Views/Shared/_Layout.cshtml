@@ -6,8 +6,8 @@
     <title>@ViewData["Title"] - نظام إدارة الأبحاث</title>
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/ResearchWeb.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/ResearchWeb.styles.css" />
 
     <style>
         body {
@@ -95,51 +95,35 @@
                 <ul class="navbar-nav ms-auto">
 
                     <li class="nav-item">
-
                         <a class="nav-link"
                            asp-controller="Dashboard"
                            asp-action="Index">
-
                             لوحة التحكم
-
                         </a>
-
                     </li>
 
                     <li class="nav-item">
-
                         <a class="nav-link"
                            asp-controller="Research"
                            asp-action="Index">
-
                             الأبحاث
-
                         </a>
-
                     </li>
 
                     <li class="nav-item">
-
                         <a class="nav-link"
                            asp-controller="Research"
                            asp-action="ByMeeting">
-
                             حسب اللجنة
-
                         </a>
-
                     </li>
 
                     <li class="nav-item">
-
                         <a class="nav-link"
                            asp-controller="Research"
                            asp-action="Duplicates">
-
                             الأبحاث المكررة
-
                         </a>
-
                     </li>
 
                 </ul>
@@ -150,11 +134,13 @@
 
     </nav>
 
+
     <div class="container mt-4">
 
         @RenderBody()
 
     </div>
+
 
     <footer class="border-top text-muted">
 
@@ -162,9 +148,10 @@
 
     </footer>
 
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/site.js"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
 

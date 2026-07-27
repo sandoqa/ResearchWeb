@@ -1,12 +1,23 @@
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ResearchWeb.Data;
-using ResearchWeb.Models;
 
 
-// √Œ– «·„‰›– „‰ Render
+// =====================================
+// Render Fix - Disable File Watcher
+// =====================================
+Environment.SetEnvironmentVariable(
+    "DOTNET_USE_POLLING_FILE_WATCHER",
+    "false"
+);
+
+
+// =====================================
+// Render Port
+// =====================================
 var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
 
 Environment.SetEnvironmentVariable(
@@ -15,13 +26,19 @@ Environment.SetEnvironmentVariable(
 );
 
 
-// ≈‰‘«¡ «· ÿ»Ìﬁ
-var builder = WebApplication.CreateBuilder(args);
+// =====================================
+// Create Builder
+// =====================================
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+{
+    Args = args,
+    EnvironmentName = Environments.Production
+});
 
-builder.Environment.EnvironmentName = Environments.Production;
 
-
-// ≈⁄œ«œ«  JSON
+// =====================================
+// Configuration
+// =====================================
 builder.Configuration.Sources.Clear();
 
 builder.Configuration
@@ -37,7 +54,9 @@ builder.Configuration
     );
 
 
-// „”«— ﬁ«⁄œ… «·»Ì«‰«  SQLite
+// =====================================
+// SQLite Database Path
+// =====================================
 var dbPath = Path.Combine(
     Directory.GetCurrentDirectory(),
     "App_Data",
@@ -45,31 +64,41 @@ var dbPath = Path.Combine(
 );
 
 
-// ≈‰‘«¡ „Ã·œ ﬁ«⁄œ… «·»Ì«‰« 
 Directory.CreateDirectory(
     Path.GetDirectoryName(dbPath)!
 );
 
 
-// —»ÿ SQLite
+// =====================================
+// Entity Framework SQLite
+// =====================================
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite($"Data Source={dbPath}")
-);
+{
+    options.UseSqlite($"Data Source={dbPath}");
+});
 
 
+// =====================================
 // MVC
+// =====================================
 builder.Services.AddControllersWithViews();
 
 
+// =====================================
 // Session
+// =====================================
 builder.Services.AddSession();
 
 
-// »‰«¡ «· ÿ»Ìﬁ
+// =====================================
+// Build App
+// =====================================
 var app = builder.Build();
 
 
-// ≈‰‘«¡ ﬁ«⁄œ… «·»Ì«‰«  Ê›Õ’ «·„” Œœ„Ì‰
+// =====================================
+// Database Check
+// =====================================
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider
@@ -79,45 +108,65 @@ using (var scope = app.Services.CreateScope())
 
     Console.WriteLine("=================================");
     Console.WriteLine($"Database Path = {dbPath}");
-   
     Console.WriteLine($"Users count = {db.Users.Count()}");
     Console.WriteLine("=================================");
 }
 
 
-// „⁄«·Ã… «·√Œÿ«¡
+// =====================================
+// Error Handling
+// =====================================
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
 }
 
 
-// ≈⁄œ«œ«  Render
-app.UseForwardedHeaders();
+// =====================================
+// Render Headers
+// =====================================
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders =
+        ForwardedHeaders.XForwardedFor |
+        ForwardedHeaders.XForwardedProto
+});
 
 
-// «·„·›«  «·À«» …
+// =====================================
+// Static Files
+// =====================================
 app.UseStaticFiles();
 
 
+// =====================================
 // Routing
+// =====================================
 app.UseRouting();
 
 
+// =====================================
 // Session
+// =====================================
 app.UseSession();
 
 
+// =====================================
 // Authorization
+// =====================================
 app.UseAuthorization();
 
 
-// «·’›Õ… «·«› —«÷Ì…
+// =====================================
+// Default Route
+// =====================================
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Login}/{action=Index}/{id?}"
 );
 
 
-//  ‘€Ì· «·„Êﬁ⁄
+// =====================================
+// Run
+// =====================================
 app.Run();
