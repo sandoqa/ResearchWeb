@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authentication;
 using ResearchWeb.Data;
 
 namespace ResearchWeb.Controllers
@@ -13,18 +14,54 @@ namespace ResearchWeb.Controllers
         }
 
 
+
         // صفحة تسجيل الدخول
         [HttpGet]
         public IActionResult Index()
         {
+            // إذا كان هناك Cookie محفوظة
+            var username = Request.Cookies["RememberUsername"];
+            var role = Request.Cookies["RememberRole"];
+
+
+            if (!string.IsNullOrEmpty(username) &&
+                !string.IsNullOrEmpty(role))
+            {
+                HttpContext.Session.SetString(
+                    "Username",
+                    username
+                );
+
+
+                HttpContext.Session.SetString(
+                    "Role",
+                    role
+                );
+
+
+                return RedirectToAction(
+                    "Index",
+                    "Dashboard"
+                );
+            }
+
+
             return View();
         }
 
 
-        // فحص بيانات الدخول
+
+
+
+        // فحص الدخول
         [HttpPost]
-        public IActionResult Index(string username, string password)
+        public IActionResult Index(
+            string username,
+            string password,
+            bool rememberMe = false)
         {
+
+
             var user = _context.Users
                 .FirstOrDefault(x =>
                     x.Username == username &&
@@ -32,8 +69,10 @@ namespace ResearchWeb.Controllers
                 );
 
 
+
             if (user != null)
             {
+
                 HttpContext.Session.SetString(
                     "Username",
                     user.Username ?? ""
@@ -46,6 +85,36 @@ namespace ResearchWeb.Controllers
                 );
 
 
+
+                // حفظ الدخول لمدة 30 يوم
+                if (rememberMe)
+                {
+
+                    CookieOptions options = new CookieOptions
+                    {
+                        Expires = DateTime.Now.AddDays(30),
+                        HttpOnly = true,
+                        Secure = true,
+                        SameSite = SameSiteMode.None
+                    };
+
+
+                    Response.Cookies.Append(
+                        "RememberUsername",
+                        user.Username ?? "",
+                        options
+                    );
+
+
+                    Response.Cookies.Append(
+                        "RememberRole",
+                        user.Role ?? "",
+                        options
+                    );
+
+                }
+
+
                 return RedirectToAction(
                     "Index",
                     "Dashboard"
@@ -53,10 +122,15 @@ namespace ResearchWeb.Controllers
             }
 
 
-            ViewBag.Error = "اسم المستخدم أو كلمة المرور غير صحيحة";
+
+            ViewBag.Error =
+                "اسم المستخدم أو كلمة المرور غير صحيحة";
+
 
             return View();
         }
+
+
 
 
 
@@ -65,7 +139,19 @@ namespace ResearchWeb.Controllers
         {
             HttpContext.Session.Clear();
 
+
+            Response.Cookies.Delete(
+                "RememberUsername"
+            );
+
+
+            Response.Cookies.Delete(
+                "RememberRole"
+            );
+
+
             return RedirectToAction("Index");
         }
+
     }
 }
