@@ -267,5 +267,16 @@ namespace ResearchWeb.Controllers
 
             return View(researches);
         }
+        public IActionResult Rejected()
+        {
+            var rejectedResearches =
+                _context.Researches
+                .Where(x => x.نتيجة_البحث == "1")
+                .OrderByDescending(x => x.ID)
+                .ToList();
+
+
+            return View(rejectedResearches);
+        }
     }
 }
