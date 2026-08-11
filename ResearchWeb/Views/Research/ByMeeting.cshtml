@@ -1,8 +1,41 @@
-﻿@model IEnumerable<ResearchWeb.Models.Research2026>
+﻿```cshtml
+@model IEnumerable<ResearchWeb.Models.Research2026>
 
 @{
     ViewData["Title"] = "الأبحاث حسب رقم اللجنة";
 }
+
+<style>
+
+    /* ============================
+           وميض الأبحاث غير الناجحة
+           نتيجة البحث = 1
+           ============================ */
+
+    .blink-red td {
+        animation: blinkRed 1s infinite;
+        font-weight: bold;
+    }
+
+    @@keyframes blinkRed {
+
+        0% {
+            background-color: white;
+            color: black;
+        }
+
+        50% {
+            background-color: red;
+            color: white;
+        }
+
+        100% {
+            background-color: white;
+            color: black;
+        }
+    }
+
+</style>
 
 
 <h2 class="text-center mb-4">
@@ -10,18 +43,17 @@
 </h2>
 
 
-
-<form method="get" asp-action="ByMeeting" class="mb-4">
+<form method="get"
+      asp-action="ByMeeting"
+      class="mb-4">
 
     <div class="input-group">
-
 
         <input type="text"
                name="meetingNumber"
                value="@ViewBag.MeetingNumber"
                class="form-control"
                placeholder="أدخل رقم اللجنة (رقم الاجتماع)" />
-
 
         <button class="btn btn-primary"
                 type="submit">
@@ -30,18 +62,13 @@
 
         </button>
 
-
     </div>
 
 </form>
 
 
-
-
-
 @if (Model != null && Model.Any())
 {
-
     <div class="alert alert-success text-center">
 
         عدد الأبحاث في اللجنة:
@@ -53,13 +80,9 @@
     </div>
 
 
-
-
     <div class="table-responsive">
 
-
         <table class="table table-bordered table-striped table-hover text-center">
-
 
             <thead class="table-dark">
 
@@ -81,48 +104,43 @@
 
                 </tr>
 
-
             </thead>
-
 
 
             <tbody>
 
-
                 @foreach (var item in Model)
                 {
+                    var rowClass =
+                    item.نتيجة_البحث?.Trim() == "1"
+                    ? "blink-red"
+                    : "";
 
-                    <tr>
+                    <tr class="@rowClass">
 
                         <td>
                             @item.ID
                         </td>
 
-
                         <td>
                             @item.اسم_الباحث
                         </td>
-
 
                         <td>
                             @item.عنوان_البحث
                         </td>
 
-
                         <td>
                             @item.رقم_البحث
                         </td>
-
 
                         <td>
                             @item.رقم_الاجتماع
                         </td>
 
-
                         <td>
                             @item.نتيجة_البحث
                         </td>
-
 
                         <td>
                             @(item.تاريخ_الاجتماع.HasValue
@@ -130,37 +148,26 @@
                                                 : "")
                 </td>
 
-
                     </tr>
-
                         }
-
 
             </tbody>
 
-
         </table>
 
-
     </div>
-
 }
 else
 {
-
     <div class="alert alert-warning text-center">
 
         لا توجد أبحاث لهذه اللجنة
 
     </div>
-
 }
 
 
-
-
 <div class="text-center mt-4">
-
 
     <a asp-controller="Research"
        asp-action="Index"
@@ -170,5 +177,5 @@ else
 
     </a>
 
-
 </div>
+```

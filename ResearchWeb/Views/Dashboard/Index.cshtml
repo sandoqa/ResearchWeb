@@ -553,135 +553,110 @@
 
 
 
-
+```html
 <!-- Chart.js -->
-
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-
 
 <script>
 
-
     const labels =
-
-    @Html.Raw(ViewBag.MeetingLabels ?? "[]");
-
-
+        @Html.Raw(ViewBag.MeetingLabels ?? "[]");
 
     const values =
-
-    @Html.Raw(ViewBag.MeetingValues ?? "[]");
-
-
+        @Html.Raw(ViewBag.MeetingValues ?? "[]");
 
     const ctx =
+        document.getElementById('meetingChart');
 
-    document.getElementById('meetingChart');
+    if (ctx) {
 
+        new Chart(ctx, {
 
+            type: 'bar',
 
-    if(ctx)
-    {
+            data: {
 
+                labels: labels,
 
-    new Chart(ctx,
+                datasets: [
+                    {
+                        label: 'عدد الأبحاث',
+                        data: values
+                    }
+                ]
 
-    {
+            },
 
-    type:'bar',
+            options: {
 
+                responsive: true,
 
-    data:
+                maintainAspectRatio: false,
 
-    {
+                scales: {
 
+                    y: {
 
-    labels:labels,
+                        beginAtZero: true,
 
+                        ticks: {
+                            precision: 0
+                        }
 
-    datasets:
+                    }
 
-    [
+                },
 
-    {
+                plugins: {
 
-    label:'عدد الأبحاث',
+                    legend: {
+                        position: 'bottom'
+                    }
 
-    data:values
+                },
 
-    }
+                // ============================
+                // الضغط على اجتماع في الرسم
+                // ============================
 
-    ]
+                onClick: function (event, elements) {
 
+                    if (elements.length > 0) {
 
-    },
+                        const index = elements[0].index;
 
+                        const meetingNumber =
+                            labels[index];
 
+                        if (meetingNumber) {
 
-    options:
+                            window.location.href =
+                                '/Research/ByMeeting?meetingNumber='
+                                + encodeURIComponent(meetingNumber);
 
-    {
+                        }
 
-    responsive:true,
+                    }
 
+                },
 
-    maintainAspectRatio:false,
+                // تحويل مؤشر الماوس إلى يد عند المرور
+                // فوق أحد الأعمدة
 
+                onHover: function (event, elements) {
 
-    scales:
+                    event.native.target.style.cursor =
+                        elements.length
+                            ? 'pointer'
+                            : 'default';
 
-    {
+                }
 
+            }
 
-    y:
-
-    {
-
-    beginAtZero:true,
-
-
-    ticks:
-    {
-
-    precision:0
-
-    }
-
-    }
-
-
-    },
-
-
-
-    plugins:
-
-    {
-
-
-    legend:
-
-    {
-
-
-    position:'bottom'
-
-    }
-
+        });
 
     }
-
-
-    }
-
-
-    });
-
-
-    }
-
-
 
 </script>
+```
