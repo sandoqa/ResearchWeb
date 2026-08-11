@@ -63,7 +63,13 @@ var dbPath = Path.Combine(
     "App_Data",
     "research.db"
 );
-
+Console.WriteLine("DATABASE PATH = " + dbPath);
+Console.WriteLine("DATABASE EXISTS = " + File.Exists(dbPath));
+Console.WriteLine("RESEARCH COUNT = " + new ApplicationDbContext(
+    new DbContextOptionsBuilder<ApplicationDbContext>()
+        .UseSqlite($"Data Source={dbPath}")
+        .Options
+).Researches.Count());
 
 Directory.CreateDirectory(
     Path.GetDirectoryName(dbPath)!
@@ -134,10 +140,11 @@ using (var scope = app.Services.CreateScope())
 
     Console.WriteLine("=================================");
     Console.WriteLine($"Database Path = {dbPath}");
+    Console.WriteLine($"Database Exists = {File.Exists(dbPath)}");
+    Console.WriteLine($"Research Count = {db.Researches.Count()}");
     Console.WriteLine($"Users count = {db.Users.Count()}");
     Console.WriteLine("=================================");
 }
-
 
 // =====================================
 // Error Handling
