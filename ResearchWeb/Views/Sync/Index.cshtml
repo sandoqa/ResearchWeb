@@ -1,0 +1,163 @@
+﻿@using Microsoft.AspNetCore.Http
+
+@{
+    ViewData["Title"] = "مزامنة قاعدة البيانات";
+
+    var role = Context.Session.GetString("Role");
+}
+
+
+<div class="container mt-4">
+
+    <h2 class="text-center mb-4">
+        🔄 مزامنة قاعدة البيانات
+    </h2>
+
+
+    <div class="alert alert-info">
+
+        <h5>طريقة المزامنة</h5>
+
+        <ol>
+
+            <li>
+                من الموقع المحلي اضغط
+                <strong>تصدير قاعدة البيانات</strong>.
+            </li>
+
+            <li>
+                سيتم تنزيل ملف JSON على جهازك.
+            </li>
+
+            <li>
+                افتح موقع ResearchWeb على Render.
+            </li>
+
+            <li>
+                ارفع ملف JSON نفسه.
+            </li>
+
+            <li>
+                سيتم تلقائيًا:
+                <ul>
+                    <li>إضافة الأبحاث الجديدة.</li>
+                    <li>تحديث الأبحاث المعدلة.</li>
+                    <li>تجاهل الأبحاث التي لم تتغير.</li>
+                </ul>
+            </li>
+
+        </ol>
+
+    </div>
+
+
+    @if (ViewBag.Message != null)
+    {
+        <div class="alert alert-success text-center">
+
+            @Html.Raw(ViewBag.Message)
+
+        </div>
+    }
+
+
+    <div class="card mb-4">
+
+        <div class="card-header bg-primary text-white">
+
+            📤 تصدير البيانات
+
+        </div>
+
+
+        <div class="card-body text-center">
+
+            <p>
+                استخدم هذا الزر في الموقع المحلي لإنشاء
+                ملف المزامنة.
+            </p>
+
+
+            <a asp-controller="Sync"
+               asp-action="Export"
+               class="btn btn-primary btn-lg">
+
+                📤 تصدير قاعدة البيانات
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="card-header bg-success text-white">
+
+            📥 استيراد المزامنة
+
+        </div>
+
+
+        <div class="card-body">
+
+            <p>
+                استخدم هذا القسم في موقع Render لرفع ملف
+                المزامنة الذي تم تصديره من الموقع المحلي.
+            </p>
+
+
+            <form asp-controller="Sync"
+                  asp-action="Import"
+                  method="post"
+                  enctype="multipart/form-data">
+
+
+                @Html.AntiForgeryToken()
+
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        اختر ملف المزامنة
+                    </label>
+
+
+                    <input type="file"
+                           name="syncFile"
+                           class="form-control"
+                           accept=".json"
+                           required />
+
+                </div>
+
+
+                <button type="submit"
+                        class="btn btn-success btn-lg">
+
+                    🔄 تنفيذ المزامنة
+
+                </button>
+
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <div class="text-center mt-4">
+
+        <a asp-controller="Research"
+           asp-action="Index"
+           class="btn btn-secondary">
+
+            ↩ العودة إلى الأبحاث
+
+        </a>
+
+    </div>
+
+</div>
