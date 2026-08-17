@@ -64,6 +64,7 @@ namespace ResearchWeb.Controllers
                     $"Provider=Microsoft.ACE.OLEDB.12.0;Data Source={filePath};";
 
                 int added = 0;
+                int updated = 0;
                 int skipped = 0;
 
                 using (OleDbConnection con =
@@ -90,68 +91,134 @@ namespace ResearchWeb.Controllers
                                 ? ""
                                 : reader["اسم الباحث"].ToString() ?? "";
 
+                            DateTime? meetingDate =
+                                reader["تاريخ الاجتماع"] == DBNull.Value
+                                ? null
+                                : Convert.ToDateTime(
+                                    reader["تاريخ الاجتماع"]);
+
                             string title =
                                 reader["عنوان البحث"] == DBNull.Value
                                 ? ""
                                 : reader["عنوان البحث"].ToString() ?? "";
 
-                            bool exists =
-                                _context.Researches.Any(x =>
-                                    x.ID == id ||
-                                    (
-                                        x.اسم_الباحث == researcher &&
-                                        x.عنوان_البحث == title
-                                    ));
+                            string researchNumber =
+                                reader["رقم البحث"] == DBNull.Value
+                                ? ""
+                                : reader["رقم البحث"].ToString() ?? "";
 
-                            if (exists)
+                            string meetingNumber =
+                                reader["رقم الاجتماع"] == DBNull.Value
+                                ? ""
+                                : reader["رقم الاجتماع"].ToString() ?? "";
+
+                            string result =
+                                reader["نتيجة البحث"] == DBNull.Value
+                                ? ""
+                                : reader["نتيجة البحث"].ToString() ?? "";
+
+                            string phone =
+                                reader["رقم الهاتف"] == DBNull.Value
+                                ? ""
+                                : reader["رقم الهاتف"].ToString() ?? "";
+
+                            string recommendations =
+                                reader["توصيات اللجنة"] == DBNull.Value
+                                ? ""
+                                : reader["توصيات اللجنة"].ToString() ?? "";
+
+                            // البحث عن البحث بواسطة ID
+                            var existing =
+                                _context.Researches
+                                .FirstOrDefault(x => x.ID == id);
+
+                            // =========================
+                            // البحث غير موجود
+                            // =========================
+                            if (existing == null)
                             {
-                                skipped++;
-                                continue;
+                                var research = new Research2026
+                                {
+                                    ID = id,
+                                    اسم_الباحث = researcher,
+                                    تاريخ_الاجتماع = meetingDate,
+                                    عنوان_البحث = title,
+                                    رقم_البحث = researchNumber,
+                                    رقم_الاجتماع = meetingNumber,
+                                    نتيجة_البحث = result,
+                                    رقم_الهاتف = phone,
+                                    توصيات_اللجنة = recommendations
+                                };
+
+                                _context.Researches.Add(research);
+
+                                added++;
                             }
-
-                            var research = new Research2026
+                            else
                             {
-                                ID = id,
+                                // =========================
+                                // البحث موجود → فحص التعديلات
+                                // =========================
 
-                                اسم_الباحث = researcher,
+                                bool changed = false;
 
-                                تاريخ_الاجتماع =
-                                    reader["تاريخ الاجتماع"] == DBNull.Value
-                                    ? null
-                                    : Convert.ToDateTime(
-                                        reader["تاريخ الاجتماع"]),
+                                if (existing.اسم_الباحث != researcher)
+                                {
+                                    existing.اسم_الباحث = researcher;
+                                    changed = true;
+                                }
 
-                                عنوان_البحث = title,
+                                if (existing.تاريخ_الاجتماع != meetingDate)
+                                {
+                                    existing.تاريخ_الاجتماع = meetingDate;
+                                    changed = true;
+                                }
 
-                                رقم_البحث =
-                                    reader["رقم البحث"] == DBNull.Value
-                                    ? ""
-                                    : reader["رقم البحث"].ToString() ?? "",
+                                if (existing.عنوان_البحث != title)
+                                {
+                                    existing.عنوان_البحث = title;
+                                    changed = true;
+                                }
 
-                                رقم_الاجتماع =
-                                    reader["رقم الاجتماع"] == DBNull.Value
-                                    ? ""
-                                    : reader["رقم الاجتماع"].ToString() ?? "",
+                                if (existing.رقم_البحث != researchNumber)
+                                {
+                                    existing.رقم_البحث = researchNumber;
+                                    changed = true;
+                                }
 
-                                نتيجة_البحث =
-                                    reader["نتيجة البحث"] == DBNull.Value
-                                    ? ""
-                                    : reader["نتيجة البحث"].ToString() ?? "",
+                                if (existing.رقم_الاجتماع != meetingNumber)
+                                {
+                                    existing.رقم_الاجتماع = meetingNumber;
+                                    changed = true;
+                                }
 
-                                رقم_الهاتف =
-                                    reader["رقم الهاتف"] == DBNull.Value
-                                    ? ""
-                                    : reader["رقم الهاتف"].ToString() ?? "",
+                                if (existing.نتيجة_البحث != result)
+                                {
+                                    existing.نتيجة_البحث = result;
+                                    changed = true;
+                                }
 
-                                توصيات_اللجنة =
-                                    reader["توصيات اللجنة"] == DBNull.Value
-                                    ? ""
-                                    : reader["توصيات اللجنة"].ToString() ?? ""
-                            };
+                                if (existing.رقم_الهاتف != phone)
+                                {
+                                    existing.رقم_الهاتف = phone;
+                                    changed = true;
+                                }
 
-                            _context.Researches.Add(research);
+                                if (existing.توصيات_اللجنة != recommendations)
+                                {
+                                    existing.توصيات_اللجنة = recommendations;
+                                    changed = true;
+                                }
 
-                            added++;
+                                if (changed)
+                                {
+                                    updated++;
+                                }
+                                else
+                                {
+                                    skipped++;
+                                }
+                            }
                         }
                     }
                 }
@@ -160,7 +227,8 @@ namespace ResearchWeb.Controllers
 
                 ViewBag.Message =
                     $"تمت إضافة {added} سجل جديد، " +
-                    $"وتم تجاهل {skipped} سجل موجود مسبقاً";
+                    $"وتحديث {updated} سجل، " +
+                    $"وتجاهل {skipped} سجل بدون تغيير";
 
                 return View("Index");
             }
