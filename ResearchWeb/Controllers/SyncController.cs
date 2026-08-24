@@ -31,9 +31,7 @@ namespace ResearchWeb.Controllers
 
         // =====================================================
         // استقبال المزامنة
-        //
-        // POST:
-        // https://researchweb-mhot.onrender.com/Sync/Receive
+        // Access هو المصدر الرئيسي
         // =====================================================
 
         [HttpPost("Receive")]
@@ -43,31 +41,83 @@ namespace ResearchWeb.Controllers
         {
             try
             {
-                if (researches == null || researches.Count == 0)
+                if (researches == null)
                 {
                     return BadRequest(new
                     {
                         success = false,
-                        message = "لا توجد بيانات للمزامنة."
+                        message = "بيانات المزامنة غير صالحة."
                     });
                 }
+
+                // =================================================
+                // إذا كانت Access فارغة
+                // لا نحذف كل أبحاث الموقع بالخطأ
+                // =================================================
+
+                if (researches.Count == 0)
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = "قاعدة Access لا تحتوي على أبحاث. لم يتم حذف أي بيانات من الموقع."
+                    });
+                }
+
 
                 int added = 0;
                 int updated = 0;
                 int skipped = 0;
+                int deleted = 0;
+
 
                 // =================================================
-                // معالجة السجلات
+                // IDs الموجودة في Access
+                // =================================================
+
+                var accessIds = researches
+                    .Select(x => x.ID)
+                    .ToHashSet();
+
+
+                // =================================================
+                // جلب جميع أبحاث ResearchWeb
+                // =================================================
+
+                var existingResearches =
+                    await _context.Researches
+                        .ToListAsync();
+
+
+                // =================================================
+                // حذف الأبحاث التي لم تعد موجودة في Access
+                // =================================================
+
+                foreach (var existing in existingResearches)
+                {
+                    if (!accessIds.Contains(existing.ID))
+                    {
+                        _context.Researches.Remove(existing);
+
+                        deleted++;
+                    }
+                }
+
+
+                // =================================================
+                // معالجة الأبحاث القادمة من Access
                 // =================================================
 
                 foreach (var source in researches)
                 {
-                    var existing = await _context.Researches
-                        .FirstOrDefaultAsync(x => x.ID == source.ID);
+                    var existing =
+                        existingResearches
+                            .FirstOrDefault(x => x.ID == source.ID);
 
-                    // =============================================
-                    // سجل جديد
-                    // =============================================
+
+                    // =================================================
+                    // بحث جديد
+                    // =================================================
 
                     if (existing == null)
                     {
@@ -75,22 +125,31 @@ namespace ResearchWeb.Controllers
                         {
                             ID = source.ID,
 
-                            اسم_الباحث = source.اسم_الباحث,
+                            اسم_الباحث =
+                                source.اسم_الباحث,
 
-                            تاريخ_الاجتماع = source.تاريخ_الاجتماع,
+                            تاريخ_الاجتماع =
+                                source.تاريخ_الاجتماع,
 
-                            عنوان_البحث = source.عنوان_البحث,
+                            عنوان_البحث =
+                                source.عنوان_البحث,
 
-                            رقم_البحث = source.رقم_البحث,
+                            رقم_البحث =
+                                source.رقم_البحث,
 
-                            رقم_الاجتماع = source.رقم_الاجتماع,
+                            رقم_الاجتماع =
+                                source.رقم_الاجتماع,
 
-                            نتيجة_البحث = source.نتيجة_البحث,
+                            نتيجة_البحث =
+                                source.نتيجة_البحث,
 
-                            رقم_الهاتف = source.رقم_الهاتف,
+                            رقم_الهاتف =
+                                source.رقم_الهاتف,
 
-                            توصيات_اللجنة = source.توصيات_اللجنة
+                            توصيات_اللجنة =
+                                source.توصيات_اللجنة
                         };
+
 
                         _context.Researches.Add(newResearch);
 
@@ -99,61 +158,93 @@ namespace ResearchWeb.Controllers
                         continue;
                     }
 
-                    // =============================================
-                    // السجل موجود → مقارنة البيانات
-                    // =============================================
+
+                    // =================================================
+                    // مقارنة البيانات
+                    // =================================================
 
                     bool changed = false;
 
-                    if (existing.اسم_الباحث != source.اسم_الباحث)
+
+                    if (existing.اسم_الباحث !=
+                        source.اسم_الباحث)
                     {
-                        existing.اسم_الباحث = source.اسم_الباحث;
+                        existing.اسم_الباحث =
+                            source.اسم_الباحث;
+
                         changed = true;
                     }
 
-                    if (existing.تاريخ_الاجتماع != source.تاريخ_الاجتماع)
+
+                    if (existing.تاريخ_الاجتماع !=
+                        source.تاريخ_الاجتماع)
                     {
-                        existing.تاريخ_الاجتماع = source.تاريخ_الاجتماع;
+                        existing.تاريخ_الاجتماع =
+                            source.تاريخ_الاجتماع;
+
                         changed = true;
                     }
 
-                    if (existing.عنوان_البحث != source.عنوان_البحث)
+
+                    if (existing.عنوان_البحث !=
+                        source.عنوان_البحث)
                     {
-                        existing.عنوان_البحث = source.عنوان_البحث;
+                        existing.عنوان_البحث =
+                            source.عنوان_البحث;
+
                         changed = true;
                     }
 
-                    if (existing.رقم_البحث != source.رقم_البحث)
+
+                    if (existing.رقم_البحث !=
+                        source.رقم_البحث)
                     {
-                        existing.رقم_البحث = source.رقم_البحث;
+                        existing.رقم_البحث =
+                            source.رقم_البحث;
+
                         changed = true;
                     }
 
-                    if (existing.رقم_الاجتماع != source.رقم_الاجتماع)
+
+                    if (existing.رقم_الاجتماع !=
+                        source.رقم_الاجتماع)
                     {
-                        existing.رقم_الاجتماع = source.رقم_الاجتماع;
+                        existing.رقم_الاجتماع =
+                            source.رقم_الاجتماع;
+
                         changed = true;
                     }
 
-                    if (existing.نتيجة_البحث != source.نتيجة_البحث)
+
+                    if (existing.نتيجة_البحث !=
+                        source.نتيجة_البحث)
                     {
-                        existing.نتيجة_البحث = source.نتيجة_البحث;
+                        existing.نتيجة_البحث =
+                            source.نتيجة_البحث;
+
                         changed = true;
                     }
 
-                    if (existing.رقم_الهاتف != source.رقم_الهاتف)
+
+                    if (existing.رقم_الهاتف !=
+                        source.رقم_الهاتف)
                     {
-                        existing.رقم_الهاتف = source.رقم_الهاتف;
+                        existing.رقم_الهاتف =
+                            source.رقم_الهاتف;
+
                         changed = true;
                     }
 
-                    if (existing.توصيات_اللجنة != source.توصيات_اللجنة)
+
+                    if (existing.توصيات_اللجنة !=
+                        source.توصيات_اللجنة)
                     {
                         existing.توصيات_اللجنة =
                             source.توصيات_اللجنة;
 
                         changed = true;
                     }
+
 
                     if (changed)
                     {
@@ -165,21 +256,24 @@ namespace ResearchWeb.Controllers
                     }
                 }
 
+
                 // =================================================
-                // حفظ البيانات
+                // حفظ جميع التغييرات
                 // =================================================
 
                 await _context.SaveChangesAsync();
 
+
                 // =================================================
-                // إرسال النتيجة إلى برنامج VB.NET
+                // النتيجة
                 // =================================================
 
                 return Ok(new
                 {
                     success = true,
 
-                    message = "تمت المزامنة بنجاح",
+                    message =
+                        "تمت المزامنة بنجاح، وأصبحت بيانات ResearchWeb مطابقة لقاعدة Access.",
 
                     added = added,
 
@@ -187,19 +281,26 @@ namespace ResearchWeb.Controllers
 
                     skipped = skipped,
 
+                    deleted = deleted,
+
                     total = researches.Count
                 });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new
-                {
-                    success = false,
+                return StatusCode(
+                    500,
+                    new
+                    {
+                        success = false,
 
-                    message = "خطأ أثناء المزامنة",
+                        message =
+                            "خطأ أثناء المزامنة",
 
-                    error = ex.Message
-                });
+                        error =
+                            ex.Message
+                    }
+                );
             }
         }
     }
