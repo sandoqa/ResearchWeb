@@ -2,12 +2,12 @@
 using Microsoft.EntityFrameworkCore;
 using ResearchWeb.Data;
 using ResearchWeb.Models;
-using System.Text;
-using System.Text.Json;
 
 namespace ResearchWeb.Controllers
 {
-    public class SyncController : Controller
+    [ApiController]
+    [Route("Sync")]
+    public class SyncController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
 
@@ -16,141 +16,58 @@ namespace ResearchWeb.Controllers
             _context = context;
         }
 
+        // =====================================================
+        // اختبار الاتصال
+        // GET:
+        // https://researchweb-mhot.onrender.com/Sync/Test
+        // =====================================================
 
-        // =========================================================
-        // التحقق من المدير
-        // =========================================================
-        private bool IsAdmin()
+        [HttpGet("Test")]
+        public IActionResult Test()
         {
-            return HttpContext.Session.GetString("Role") == "Admin";
-        }
-
-        // =========================================================
-        // صفحة المزامنة
-        // =========================================================
-
-        [HttpGet]
-        public IActionResult Index()
-        {
-            if (!IsAdmin())
-                return RedirectToAction("Index", "Dashboard");
-
-            return View();
+            return Ok("SYNC API يعمل بنجاح");
         }
 
 
-        // =========================================================
-        // تصدير جميع الأبحاث إلى JSON
-        // =========================================================
+        // =====================================================
+        // استقبال المزامنة
+        //
+        // POST:
+        // https://researchweb-mhot.onrender.com/Sync/Receive
+        // =====================================================
 
-        [HttpGet]
-        public async Task<IActionResult> Export()
+        [HttpPost("Receive")]
+        [IgnoreAntiforgeryToken]
+        public async Task<IActionResult> Receive(
+            [FromBody] List<Research2026> researches)
         {
-            if (!IsAdmin())
-                return RedirectToAction("Index", "Dashboard");
-
-
-            var researches = await _context.Researches
-                .AsNoTracking()
-                .OrderBy(x => x.ID)
-                .ToListAsync();
-
-
-            var options = new JsonSerializerOptions
-            {
-                WriteIndented = true,
-                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-            };
-
-
-            string json = JsonSerializer.Serialize(
-                researches,
-                options
-            );
-
-
-            byte[] bytes = Encoding.UTF8.GetBytes(json);
-
-
-            string fileName =
-                $"ResearchSync_{DateTime.Now:yyyyMMdd_HHmmss}.json";
-
-
-            return File(
-                bytes,
-                "application/json",
-                fileName
-            );
-        }
-
-
-        // =========================================================
-        // استيراد ملف المزامنة
-        // =========================================================
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Import(IFormFile syncFile)
-        {
-            if (!IsAdmin())
-                return RedirectToAction("Index", "Dashboard");
-
-
-            if (syncFile == null || syncFile.Length == 0)
-            {
-                ViewBag.Message =
-                    "❌ لم يتم اختيار ملف المزامنة.";
-
-                return View("Index");
-            }
-
-
             try
             {
-                List<Research2026>? importedResearches;
-
-
-                using (var stream = syncFile.OpenReadStream())
+                if (researches == null || researches.Count == 0)
                 {
-                    importedResearches =
-                        await JsonSerializer.DeserializeAsync<List<Research2026>>(
-                            stream,
-                            new JsonSerializerOptions
-                            {
-                                PropertyNameCaseInsensitive = true
-                            }
-                        );
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = "لا توجد بيانات للمزامنة."
+                    });
                 }
-
-
-                if (importedResearches == null)
-                {
-                    ViewBag.Message =
-                        "❌ ملف المزامنة فارغ أو غير صالح.";
-
-                    return View("Index");
-                }
-
 
                 int added = 0;
                 int updated = 0;
                 int skipped = 0;
 
-
                 // =================================================
-                // معالجة كل بحث
+                // معالجة السجلات
                 // =================================================
 
-                foreach (var source in importedResearches)
+                foreach (var source in researches)
                 {
-                    var existing =
-                        await _context.Researches
-                            .FirstOrDefaultAsync(x => x.ID == source.ID);
+                    var existing = await _context.Researches
+                        .FirstOrDefaultAsync(x => x.ID == source.ID);
 
-
-                    // =================================================
-                    // السجل غير موجود → إضافة
-                    // =================================================
+                    // =============================================
+                    // سجل جديد
+                    // =============================================
 
                     if (existing == null)
                     {
@@ -158,31 +75,22 @@ namespace ResearchWeb.Controllers
                         {
                             ID = source.ID,
 
-                            اسم_الباحث =
-                                source.اسم_الباحث,
+                            اسم_الباحث = source.اسم_الباحث,
 
-                            تاريخ_الاجتماع =
-                                source.تاريخ_الاجتماع,
+                            تاريخ_الاجتماع = source.تاريخ_الاجتماع,
 
-                            عنوان_البحث =
-                                source.عنوان_البحث,
+                            عنوان_البحث = source.عنوان_البحث,
 
-                            رقم_البحث =
-                                source.رقم_البحث,
+                            رقم_البحث = source.رقم_البحث,
 
-                            رقم_الاجتماع =
-                                source.رقم_الاجتماع,
+                            رقم_الاجتماع = source.رقم_الاجتماع,
 
-                            نتيجة_البحث =
-                                source.نتيجة_البحث,
+                            نتيجة_البحث = source.نتيجة_البحث,
 
-                            رقم_الهاتف =
-                                source.رقم_الهاتف,
+                            رقم_الهاتف = source.رقم_الهاتف,
 
-                            توصيات_اللجنة =
-                                source.توصيات_اللجنة
+                            توصيات_اللجنة = source.توصيات_اللجنة
                         };
-
 
                         _context.Researches.Add(newResearch);
 
@@ -191,76 +99,53 @@ namespace ResearchWeb.Controllers
                         continue;
                     }
 
-
-                    // =================================================
-                    // السجل موجود → مقارنة جميع الحقول
-                    // =================================================
+                    // =============================================
+                    // السجل موجود → مقارنة البيانات
+                    // =============================================
 
                     bool changed = false;
 
-
                     if (existing.اسم_الباحث != source.اسم_الباحث)
                     {
-                        existing.اسم_الباحث =
-                            source.اسم_الباحث;
-
+                        existing.اسم_الباحث = source.اسم_الباحث;
                         changed = true;
                     }
-
 
                     if (existing.تاريخ_الاجتماع != source.تاريخ_الاجتماع)
                     {
-                        existing.تاريخ_الاجتماع =
-                            source.تاريخ_الاجتماع;
-
+                        existing.تاريخ_الاجتماع = source.تاريخ_الاجتماع;
                         changed = true;
                     }
-
 
                     if (existing.عنوان_البحث != source.عنوان_البحث)
                     {
-                        existing.عنوان_البحث =
-                            source.عنوان_البحث;
-
+                        existing.عنوان_البحث = source.عنوان_البحث;
                         changed = true;
                     }
-
 
                     if (existing.رقم_البحث != source.رقم_البحث)
                     {
-                        existing.رقم_البحث =
-                            source.رقم_البحث;
-
+                        existing.رقم_البحث = source.رقم_البحث;
                         changed = true;
                     }
-
 
                     if (existing.رقم_الاجتماع != source.رقم_الاجتماع)
                     {
-                        existing.رقم_الاجتماع =
-                            source.رقم_الاجتماع;
-
+                        existing.رقم_الاجتماع = source.رقم_الاجتماع;
                         changed = true;
                     }
-
 
                     if (existing.نتيجة_البحث != source.نتيجة_البحث)
                     {
-                        existing.نتيجة_البحث =
-                            source.نتيجة_البحث;
-
+                        existing.نتيجة_البحث = source.نتيجة_البحث;
                         changed = true;
                     }
-
 
                     if (existing.رقم_الهاتف != source.رقم_الهاتف)
                     {
-                        existing.رقم_الهاتف =
-                            source.رقم_الهاتف;
-
+                        existing.رقم_الهاتف = source.رقم_الهاتف;
                         changed = true;
                     }
-
 
                     if (existing.توصيات_اللجنة != source.توصيات_اللجنة)
                     {
@@ -269,7 +154,6 @@ namespace ResearchWeb.Controllers
 
                         changed = true;
                     }
-
 
                     if (changed)
                     {
@@ -281,30 +165,41 @@ namespace ResearchWeb.Controllers
                     }
                 }
 
-
                 // =================================================
-                // حفظ التغييرات
+                // حفظ البيانات
                 // =================================================
 
                 await _context.SaveChangesAsync();
 
+                // =================================================
+                // إرسال النتيجة إلى برنامج VB.NET
+                // =================================================
 
-                ViewBag.Message =
-                    $"✅ تمت المزامنة بنجاح<br>" +
-                    $"➕ سجلات جديدة: <strong>{added}</strong><br>" +
-                    $"🔄 سجلات محدثة: <strong>{updated}</strong><br>" +
-                    $"⏭ سجلات بدون تغيير: <strong>{skipped}</strong>";
+                return Ok(new
+                {
+                    success = true,
 
+                    message = "تمت المزامنة بنجاح",
 
-                return View("Index");
+                    added = added,
+
+                    updated = updated,
+
+                    skipped = skipped,
+
+                    total = researches.Count
+                });
             }
             catch (Exception ex)
             {
-                ViewBag.Message =
-                    "❌ حدث خطأ أثناء المزامنة:<br>" +
-                    ex.Message;
+                return StatusCode(500, new
+                {
+                    success = false,
 
-                return View("Index");
+                    message = "خطأ أثناء المزامنة",
+
+                    error = ex.Message
+                });
             }
         }
     }
