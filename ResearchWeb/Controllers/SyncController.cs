@@ -16,8 +16,10 @@ namespace ResearchWeb.Controllers
             _context = context;
         }
 
+
         // =====================================================
         // اختبار الاتصال
+        //
         // GET:
         // https://researchweb-mhot.onrender.com/Sync/Test
         // =====================================================
@@ -30,8 +32,10 @@ namespace ResearchWeb.Controllers
 
 
         // =====================================================
-        // استقبال المزامنة
-        // Access هو المصدر الرئيسي
+        // استقبال المزامنة من برنامج VB.NET
+        //
+        // POST:
+        // https://researchweb-mhot.onrender.com/Sync/Receive
         // =====================================================
 
         [HttpPost("Receive")]
@@ -41,28 +45,28 @@ namespace ResearchWeb.Controllers
         {
             try
             {
-                if (researches == null)
+                // =================================================
+                // التحقق من البيانات
+                // =================================================
+
+                if (researches == null || researches.Count == 0)
                 {
                     return BadRequest(new
                     {
                         success = false,
-                        message = "بيانات المزامنة غير صالحة."
+                        message = "لا توجد بيانات للمزامنة."
                     });
                 }
 
+
                 // =================================================
-                // إذا كانت Access فارغة
-                // لا نحذف كل أبحاث الموقع بالخطأ
+                // منع تكرار نفس ID داخل البيانات القادمة
                 // =================================================
 
-                if (researches.Count == 0)
-                {
-                    return BadRequest(new
-                    {
-                        success = false,
-                        message = "قاعدة Access لا تحتوي على أبحاث. لم يتم حذف أي بيانات من الموقع."
-                    });
-                }
+                researches = researches
+                    .GroupBy(x => x.ID)
+                    .Select(g => g.First())
+                    .ToList();
 
 
                 int added = 0;
@@ -73,6 +77,8 @@ namespace ResearchWeb.Controllers
 
                 // =================================================
                 // IDs الموجودة في Access
+                //
+                // هذه القائمة هي المصدر الرئيسي للحذف
                 // =================================================
 
                 var accessIds = researches
@@ -90,22 +96,7 @@ namespace ResearchWeb.Controllers
 
 
                 // =================================================
-                // حذف الأبحاث التي لم تعد موجودة في Access
-                // =================================================
-
-                foreach (var existing in existingResearches)
-                {
-                    if (!accessIds.Contains(existing.ID))
-                    {
-                        _context.Researches.Remove(existing);
-
-                        deleted++;
-                    }
-                }
-
-
-                // =================================================
-                // معالجة الأبحاث القادمة من Access
+                // معالجة الإضافة والتحديث
                 // =================================================
 
                 foreach (var source in researches)
@@ -116,7 +107,8 @@ namespace ResearchWeb.Controllers
 
 
                     // =================================================
-                    // بحث جديد
+                    // البحث غير موجود في ResearchWeb
+                    // → إضافة
                     // =================================================
 
                     if (existing == null)
@@ -160,14 +152,14 @@ namespace ResearchWeb.Controllers
 
 
                     // =================================================
-                    // مقارنة البيانات
+                    // البحث موجود
+                    // → مقارنة جميع الحقول
                     // =================================================
 
                     bool changed = false;
 
 
-                    if (existing.اسم_الباحث !=
-                        source.اسم_الباحث)
+                    if (existing.اسم_الباحث != source.اسم_الباحث)
                     {
                         existing.اسم_الباحث =
                             source.اسم_الباحث;
@@ -176,8 +168,7 @@ namespace ResearchWeb.Controllers
                     }
 
 
-                    if (existing.تاريخ_الاجتماع !=
-                        source.تاريخ_الاجتماع)
+                    if (existing.تاريخ_الاجتماع != source.تاريخ_الاجتماع)
                     {
                         existing.تاريخ_الاجتماع =
                             source.تاريخ_الاجتماع;
@@ -186,8 +177,7 @@ namespace ResearchWeb.Controllers
                     }
 
 
-                    if (existing.عنوان_البحث !=
-                        source.عنوان_البحث)
+                    if (existing.عنوان_البحث != source.عنوان_البحث)
                     {
                         existing.عنوان_البحث =
                             source.عنوان_البحث;
@@ -196,8 +186,7 @@ namespace ResearchWeb.Controllers
                     }
 
 
-                    if (existing.رقم_البحث !=
-                        source.رقم_البحث)
+                    if (existing.رقم_البحث != source.رقم_البحث)
                     {
                         existing.رقم_البحث =
                             source.رقم_البحث;
@@ -206,8 +195,7 @@ namespace ResearchWeb.Controllers
                     }
 
 
-                    if (existing.رقم_الاجتماع !=
-                        source.رقم_الاجتماع)
+                    if (existing.رقم_الاجتماع != source.رقم_الاجتماع)
                     {
                         existing.رقم_الاجتماع =
                             source.رقم_الاجتماع;
@@ -216,8 +204,7 @@ namespace ResearchWeb.Controllers
                     }
 
 
-                    if (existing.نتيجة_البحث !=
-                        source.نتيجة_البحث)
+                    if (existing.نتيجة_البحث != source.نتيجة_البحث)
                     {
                         existing.نتيجة_البحث =
                             source.نتيجة_البحث;
@@ -226,8 +213,7 @@ namespace ResearchWeb.Controllers
                     }
 
 
-                    if (existing.رقم_الهاتف !=
-                        source.رقم_الهاتف)
+                    if (existing.رقم_الهاتف != source.رقم_الهاتف)
                     {
                         existing.رقم_الهاتف =
                             source.رقم_الهاتف;
@@ -236,8 +222,7 @@ namespace ResearchWeb.Controllers
                     }
 
 
-                    if (existing.توصيات_اللجنة !=
-                        source.توصيات_اللجنة)
+                    if (existing.توصيات_اللجنة != source.توصيات_اللجنة)
                     {
                         existing.توصيات_اللجنة =
                             source.توصيات_اللجنة;
@@ -258,6 +243,28 @@ namespace ResearchWeb.Controllers
 
 
                 // =================================================
+                // الحذف
+                //
+                // أي سجل موجود في ResearchWeb
+                // وليس موجودًا في Access
+                // سيتم حذفه
+                // =================================================
+
+                var researchesToDelete =
+                    existingResearches
+                        .Where(x => !accessIds.Contains(x.ID))
+                        .ToList();
+
+
+                foreach (var research in researchesToDelete)
+                {
+                    _context.Researches.Remove(research);
+
+                    deleted++;
+                }
+
+
+                // =================================================
                 // حفظ جميع التغييرات
                 // =================================================
 
@@ -273,7 +280,8 @@ namespace ResearchWeb.Controllers
                     success = true,
 
                     message =
-                        "تمت المزامنة بنجاح، وأصبحت بيانات ResearchWeb مطابقة لقاعدة Access.",
+                        "تمت المزامنة بنجاح. " +
+                        "تمت مطابقة ResearchWeb مع قاعدة Access.",
 
                     added = added,
 
@@ -288,6 +296,10 @@ namespace ResearchWeb.Controllers
             }
             catch (Exception ex)
             {
+                // =================================================
+                // في حالة الخطأ
+                // =================================================
+
                 return StatusCode(
                     500,
                     new
@@ -295,10 +307,12 @@ namespace ResearchWeb.Controllers
                         success = false,
 
                         message =
-                            "خطأ أثناء المزامنة",
+                            "حدث خطأ أثناء المزامنة.",
 
-                        error =
-                            ex.Message
+                        error = ex.Message,
+
+                        innerError =
+                            ex.InnerException?.Message
                     }
                 );
             }

@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Npgsql;
+using ResearchWeb;
 using ResearchWeb.Data;
 
 // =====================================
@@ -65,17 +66,37 @@ builder.Configuration
 // Database
 // =====================================
 
+// Â–« «·„ €Ì— „ÊÃÊœ ›Ì Render ›ﬁÿ ⁄«œ…
 var databaseUrl =
     Environment.GetEnvironmentVariable("DATABASE_URL");
 
+// =====================================
+// SQLite Path
+// =====================================
+
+var sqlitePath =
+    Path.Combine(
+        Directory.GetCurrentDirectory(),
+        "App_Data",
+        "research.db"
+    );
+
+Directory.CreateDirectory(
+    Path.GetDirectoryName(sqlitePath)!
+);
+
+// =====================================
+// Connection String
+// =====================================
+
 string connectionString;
+
+// =====================================
+// Render PostgreSQL
+// =====================================
 
 if (!string.IsNullOrWhiteSpace(databaseUrl))
 {
-    // =================================
-    // Render PostgreSQL
-    // =================================
-
     Console.WriteLine(
         "================================="
     );
@@ -110,9 +131,10 @@ if (!string.IsNullOrWhiteSpace(databaseUrl))
         {
             Host = uri.Host,
 
-            Port = uri.Port > 0
-                ? uri.Port
-                : 5432,
+            Port =
+                uri.Port > 0
+                    ? uri.Port
+                    : 5432,
 
             Database =
                 uri.AbsolutePath.TrimStart('/'),
@@ -129,33 +151,19 @@ if (!string.IsNullOrWhiteSpace(databaseUrl))
                     )
                     : "",
 
-            // Render PostgreSQL
-            // SSL is required for external
-            // connections and harmless when
-            // using the Render URL.
             SslMode = SslMode.Require
         };
 
     connectionString =
         builderConnection.ConnectionString;
 }
+
+// =====================================
+// Local SQLite
+// =====================================
+
 else
 {
-    // =================================
-    // Local SQLite
-    // =================================
-
-    var dbPath =
-        Path.Combine(
-            Directory.GetCurrentDirectory(),
-            "App_Data",
-            "research.db"
-        );
-
-    Directory.CreateDirectory(
-        Path.GetDirectoryName(dbPath)!
-    );
-
     Console.WriteLine(
         "================================="
     );
@@ -165,12 +173,12 @@ else
     );
 
     Console.WriteLine(
-        "DATABASE PATH = " + dbPath
+        "DATABASE PATH = " + sqlitePath
     );
 
     Console.WriteLine(
         "DATABASE EXISTS = " +
-        File.Exists(dbPath)
+        File.Exists(sqlitePath)
     );
 
     Console.WriteLine(
@@ -178,7 +186,7 @@ else
     );
 
     connectionString =
-        $"Data Source={dbPath}";
+        $"Data Source={sqlitePath}";
 }
 
 // =====================================
@@ -190,12 +198,20 @@ builder.Services.AddDbContext<ApplicationDbContext>(
     {
         if (!string.IsNullOrWhiteSpace(databaseUrl))
         {
+            // =================================
+            // Render PostgreSQL
+            // =================================
+
             options.UseNpgsql(
                 connectionString
             );
         }
         else
         {
+            // =================================
+            // Local SQLite
+            // =================================
+
             options.UseSqlite(
                 connectionString
             );
@@ -256,17 +272,46 @@ using (var scope = app.Services.CreateScope())
         "================================="
     );
 
-    Console.WriteLine(
-        "Applying database migrations..."
-    );
-
     try
     {
-        db.Database.Migrate();
+        if (!string.IsNullOrWhiteSpace(databaseUrl))
+        {
+            // =================================
+            // Render PostgreSQL
+            // =================================
 
-        Console.WriteLine(
-            "Database migrations completed."
-        );
+            Console.WriteLine(
+                "DATABASE = PostgreSQL"
+            );
+
+            Console.WriteLine(
+                "Applying PostgreSQL database migrations..."
+            );
+
+            db.Database.Migrate();
+
+            Console.WriteLine(
+                "PostgreSQL migrations completed."
+            );
+        }
+        else
+        {
+            // =================================
+            // Local SQLite
+            // =================================
+
+            Console.WriteLine(
+                "DATABASE = SQLite"
+            );
+
+            Console.WriteLine(
+                "Skipping SQLite migrations."
+            );
+
+            Console.WriteLine(
+                "Using existing local SQLite database."
+            );
+        }
     }
     catch (Exception ex)
     {
@@ -287,6 +332,100 @@ using (var scope = app.Services.CreateScope())
 }
 
 // =====================================
+// SQLite ? PostgreSQL Migration
+// TEMPORARY
+// =====================================
+
+// Â–« «·„ €Ì— ·‰ ÌﬂÊ‰ „›⁄·« »‘ﬂ· ÿ»Ì⁄Ì.
+// ”‰›⁄·Â ›ﬁÿ ⁄‰œ„« ‰—Ìœ ‰ﬁ· «·»Ì«‰« .
+
+var migrateData =
+    Environment.GetEnvironmentVariable(
+        "MIGRATE_SQLITE_TO_POSTGRES"
+    );
+
+if (
+    string.Equals(
+        migrateData,
+        "true",
+        StringComparison.OrdinalIgnoreCase
+    )
+)
+{
+    if (string.IsNullOrWhiteSpace(databaseUrl))
+    {
+        Console.WriteLine(
+            "================================="
+        );
+
+        Console.WriteLine(
+            "ERROR: DATABASE_URL is not configured."
+        );
+
+        Console.WriteLine(
+            "SQLite ? PostgreSQL migration cancelled."
+        );
+
+        Console.WriteLine(
+            "================================="
+        );
+    }
+    else
+    {
+        Console.WriteLine(
+            "================================="
+        );
+
+        Console.WriteLine(
+            "STARTING SQLITE ? POSTGRESQL TRANSFER"
+        );
+
+        Console.WriteLine(
+            "================================="
+        );
+
+        try
+        {
+            await DataMigration.RunAsync(
+                connectionString
+            );
+
+            Console.WriteLine(
+                "================================="
+            );
+
+            Console.WriteLine(
+                "SQLITE ? POSTGRESQL TRANSFER FINISHED"
+            );
+
+            Console.WriteLine(
+                "================================="
+            );
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(
+                "================================="
+            );
+
+            Console.WriteLine(
+                "DATA TRANSFER ERROR:"
+            );
+
+            Console.WriteLine(
+                ex.ToString()
+            );
+
+            Console.WriteLine(
+                "================================="
+            );
+
+            throw;
+        }
+    }
+}
+
+// =====================================
 // Database Check
 // =====================================
 
@@ -303,18 +442,15 @@ using (var scope = app.Services.CreateScope())
     try
     {
         Console.WriteLine(
-            $"Research Count = " +
-            $"{db.Researches.Count()}"
+            $"Research Count = {db.Researches.Count()}"
         );
 
         Console.WriteLine(
-            $"Users count = " +
-            $"{db.Users.Count()}"
+            $"Users count = {db.Users.Count()}"
         );
 
         Console.WriteLine(
-            $"Visitors count = " +
-            $"{db.Visitors.Count()}"
+            $"Visitors count = {db.Visitors.Count()}"
         );
     }
     catch (Exception ex)
