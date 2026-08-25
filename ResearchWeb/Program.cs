@@ -4,18 +4,8 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Npgsql;
 using ResearchWeb.Data;
-
-
-// =====================================
-// Render
-// =====================================
-
-Environment.SetEnvironmentVariable(
-    "DOTNET_USE_POLLING_FILE_WATCHER",
-    "true"
-);
-
 
 // =====================================
 // Render Port
@@ -30,7 +20,6 @@ Environment.SetEnvironmentVariable(
     $"http://0.0.0.0:{port}"
 );
 
-
 // =====================================
 // Create Builder
 // =====================================
@@ -43,7 +32,6 @@ var builder =
             EnvironmentName = Environments.Production
         }
     );
-
 
 // =====================================
 // Configuration
@@ -61,32 +49,80 @@ builder.Configuration
         $"appsettings.{builder.Environment.EnvironmentName}.json",
         optional: true,
         reloadOnChange: false
+    )
+    .AddEnvironmentVariables();
+
+// =====================================
+// Database
+// =====================================
+
+var databaseUrl =
+    Environment.GetEnvironmentVariable("DATABASE_URL");
+
+string connectionString;
+
+if (!string.IsNullOrWhiteSpace(databaseUrl))
+{
+    // =================================
+    // Render PostgreSQL
+    // =================================
+
+    Console.WriteLine(
+        "DATABASE = PostgreSQL"
     );
 
+    var uri = new Uri(databaseUrl);
 
-// =====================================
-// SQLite Database
-// =====================================
+    var userInfo =
+        uri.UserInfo.Split(':', 2);
 
-var dbPath = Path.Combine(
-    Directory.GetCurrentDirectory(),
-    "App_Data",
-    "research.db"
-);
+    var builderConnection =
+        new NpgsqlConnectionStringBuilder
+        {
+            Host = uri.Host,
+            Port = uri.Port,
+            Database = uri.AbsolutePath.TrimStart('/'),
+            Username = Uri.UnescapeDataString(userInfo[0]),
+            Password = userInfo.Length > 1
+                ? Uri.UnescapeDataString(userInfo[1])
+                : ""
+        };
 
-Directory.CreateDirectory(
-    Path.GetDirectoryName(dbPath)!
-);
+    connectionString =
+        builderConnection.ConnectionString;
+}
+else
+{
+    // =================================
+    // Local SQLite
+    // =================================
 
-Console.WriteLine(
-    "DATABASE PATH = " + dbPath
-);
+    var dbPath = Path.Combine(
+        Directory.GetCurrentDirectory(),
+        "App_Data",
+        "research.db"
+    );
 
-Console.WriteLine(
-    "DATABASE EXISTS = " +
-    File.Exists(dbPath)
-);
+    Directory.CreateDirectory(
+        Path.GetDirectoryName(dbPath)!
+    );
 
+    Console.WriteLine(
+        "DATABASE = SQLite"
+    );
+
+    Console.WriteLine(
+        "DATABASE PATH = " + dbPath
+    );
+
+    Console.WriteLine(
+        "DATABASE EXISTS = " +
+        File.Exists(dbPath)
+    );
+
+    connectionString =
+        $"Data Source={dbPath}";
+}
 
 // =====================================
 // Entity Framework
@@ -95,12 +131,16 @@ Console.WriteLine(
 builder.Services.AddDbContext<ApplicationDbContext>(
     options =>
     {
-        options.UseSqlite(
-            $"Data Source={dbPath}"
-        );
+        if (!string.IsNullOrWhiteSpace(databaseUrl))
+        {
+            options.UseNpgsql(connectionString);
+        }
+        else
+        {
+            options.UseSqlite(connectionString);
+        }
     }
 );
-
 
 // =====================================
 // MVC + API
@@ -108,13 +148,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(
 
 builder.Services.AddControllersWithViews();
 
-
 // =====================================
 // Session
 // =====================================
 
 builder.Services.AddSession();
-
 
 // =====================================
 // Data Protection
@@ -134,13 +172,11 @@ builder.Services
         new DirectoryInfo(keysFolder)
     );
 
-
 // =====================================
 // Build
 // =====================================
 
 var app = builder.Build();
-
 
 // =====================================
 // Database Migration
@@ -152,9 +188,24 @@ using (var scope = app.Services.CreateScope())
         scope.ServiceProvider
             .GetRequiredService<ApplicationDbContext>();
 
-    db.Database.Migrate();
-}
+    Console.WriteLine(
+        "================================="
+    );
 
+    Console.WriteLine(
+        "Applying database migrations..."
+    );
+
+    db.Database.Migrate();
+
+    Console.WriteLine(
+        "Database migrations completed."
+    );
+
+    Console.WriteLine(
+        "================================="
+    );
+}
 
 // =====================================
 // Database Check
@@ -171,14 +222,6 @@ using (var scope = app.Services.CreateScope())
     );
 
     Console.WriteLine(
-        $"Database Path = {dbPath}"
-    );
-
-    Console.WriteLine(
-        $"Database Exists = {File.Exists(dbPath)}"
-    );
-
-    Console.WriteLine(
         $"Research Count = {db.Researches.Count()}"
     );
 
@@ -187,10 +230,13 @@ using (var scope = app.Services.CreateScope())
     );
 
     Console.WriteLine(
+        $"Visitors count = {db.Visitors.Count()}"
+    );
+
+    Console.WriteLine(
         "================================="
     );
 }
-
 
 // =====================================
 // Error Handling
@@ -202,7 +248,6 @@ if (!app.Environment.IsDevelopment())
         "/Home/Error"
     );
 }
-
 
 // =====================================
 // Render Headers
@@ -217,13 +262,11 @@ app.UseForwardedHeaders(
     }
 );
 
-
 // =====================================
 // Static Files
 // =====================================
 
 app.UseStaticFiles();
-
 
 // =====================================
 // Routing
@@ -231,13 +274,11 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-
 // =====================================
 // Session
 // =====================================
 
 app.UseSession();
-
 
 // =====================================
 // Authorization
@@ -245,13 +286,11 @@ app.UseSession();
 
 app.UseAuthorization();
 
-
 // =====================================
 // API Controllers
 // =====================================
 
 app.MapControllers();
-
 
 // =====================================
 // MVC Default Route
@@ -261,7 +300,6 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Login}/{action=Index}/{id?}"
 );
-
 
 // =====================================
 // Run
