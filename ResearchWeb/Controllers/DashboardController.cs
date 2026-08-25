@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿
+using Microsoft.AspNetCore.Mvc;
 using ResearchWeb.Data;
 using ResearchWeb.Models;
 using System.Text.Json;
@@ -9,25 +10,18 @@ namespace ResearchWeb.Controllers
     {
         private readonly ApplicationDbContext _context;
 
-
         public DashboardController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-
-
         public IActionResult Index()
         {
-
             ViewBag.Username =
                 HttpContext.Session.GetString("Username");
 
-
             ViewBag.Role =
                 HttpContext.Session.GetString("Role");
-
-
 
             // ==========================
             // تسجيل زيارة جديدة
@@ -35,27 +29,20 @@ namespace ResearchWeb.Controllers
 
             var visitor = new Visitor
             {
-                VisitDate = DateTime.Now
+                // PostgreSQL timestamp with time zone يحتاج UTC
+                VisitDate = DateTime.UtcNow
             };
-
 
             _context.Visitors.Add(visitor);
             _context.SaveChanges();
-
-
 
             // عدد الزوار
             ViewBag.VisitorsCount =
                 _context.Visitors.Count();
 
-
-
-
             // عدد الأبحاث الكلي
             ViewBag.Research2026Count =
                 _context.Researches.Count();
-
-
 
             // عدد الباحثين
             ViewBag.ResearchersCount =
@@ -65,8 +52,6 @@ namespace ResearchWeb.Controllers
                 .Distinct()
                 .Count();
 
-
-
             // عدد نتائج البحث المختلفة
             ViewBag.ResultsCount =
                 _context.Researches
@@ -74,8 +59,6 @@ namespace ResearchWeb.Controllers
                 .Select(x => x.نتيجة_البحث)
                 .Distinct()
                 .Count();
-
-
 
             // عدد الاجتماعات
             ViewBag.MeetingsCount =
@@ -85,15 +68,9 @@ namespace ResearchWeb.Controllers
                 .Distinct()
                 .Count();
 
-
-
             // عدد المستخدمين
             ViewBag.UsersCount =
                 _context.Users.Count();
-
-
-
-
 
             // ==========================
             // رسم نتائج الأبحاث
@@ -110,23 +87,15 @@ namespace ResearchWeb.Controllers
                 })
                 .ToList();
 
-
-
             ViewBag.ResultLabels =
                 JsonSerializer.Serialize(
                     resultsStatistics.Select(x => x.Result)
                 );
 
-
             ViewBag.ResultValues =
                 JsonSerializer.Serialize(
                     resultsStatistics.Select(x => x.Count)
                 );
-
-
-
-
-
 
             // ==========================
             // رسم الأبحاث حسب رقم الاجتماع
@@ -144,26 +113,19 @@ namespace ResearchWeb.Controllers
                 .OrderBy(x => x.Meeting)
                 .ToList();
 
-
-
             ViewBag.MeetingLabels =
                 JsonSerializer.Serialize(
                     meetingStatistics.Select(x => x.Meeting)
                 );
-
-
 
             ViewBag.MeetingValues =
                 JsonSerializer.Serialize(
                     meetingStatistics.Select(x => x.Count)
                 );
 
-
-
-
-
-
+            // ==========================
             // آخر 10 أبحاث
+            // ==========================
 
             var latestResearches =
                 _context.Researches
@@ -171,19 +133,13 @@ namespace ResearchWeb.Controllers
                 .Take(10)
                 .ToList();
 
-
-
             return View(latestResearches);
-
         }
-
-
-
 
         public IActionResult Committee()
         {
             return View();
         }
-
     }
 }
+
