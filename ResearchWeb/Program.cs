@@ -8,6 +8,15 @@ using Npgsql;
 using ResearchWeb.Data;
 
 // =====================================
+// Render - File Watcher
+// =====================================
+
+Environment.SetEnvironmentVariable(
+    "DOTNET_USE_POLLING_FILE_WATCHER",
+    "1"
+);
+
+// =====================================
 // Render Port
 // =====================================
 
@@ -68,7 +77,19 @@ if (!string.IsNullOrWhiteSpace(databaseUrl))
     // =================================
 
     Console.WriteLine(
+        "================================="
+    );
+
+    Console.WriteLine(
         "DATABASE = PostgreSQL"
+    );
+
+    Console.WriteLine(
+        "DATABASE_URL detected."
+    );
+
+    Console.WriteLine(
+        "================================="
     );
 
     var uri = new Uri(databaseUrl);
@@ -76,16 +97,43 @@ if (!string.IsNullOrWhiteSpace(databaseUrl))
     var userInfo =
         uri.UserInfo.Split(':', 2);
 
+    if (userInfo.Length == 0 ||
+        string.IsNullOrWhiteSpace(userInfo[0]))
+    {
+        throw new InvalidOperationException(
+            "DATABASE_URL username is missing."
+        );
+    }
+
     var builderConnection =
         new NpgsqlConnectionStringBuilder
         {
             Host = uri.Host,
-            Port = uri.Port,
-            Database = uri.AbsolutePath.TrimStart('/'),
-            Username = Uri.UnescapeDataString(userInfo[0]),
-            Password = userInfo.Length > 1
-                ? Uri.UnescapeDataString(userInfo[1])
-                : ""
+
+            Port = uri.Port > 0
+                ? uri.Port
+                : 5432,
+
+            Database =
+                uri.AbsolutePath.TrimStart('/'),
+
+            Username =
+                Uri.UnescapeDataString(
+                    userInfo[0]
+                ),
+
+            Password =
+                userInfo.Length > 1
+                    ? Uri.UnescapeDataString(
+                        userInfo[1]
+                    )
+                    : "",
+
+            // Render PostgreSQL
+            // SSL is required for external
+            // connections and harmless when
+            // using the Render URL.
+            SslMode = SslMode.Require
         };
 
     connectionString =
@@ -97,14 +145,19 @@ else
     // Local SQLite
     // =================================
 
-    var dbPath = Path.Combine(
-        Directory.GetCurrentDirectory(),
-        "App_Data",
-        "research.db"
-    );
+    var dbPath =
+        Path.Combine(
+            Directory.GetCurrentDirectory(),
+            "App_Data",
+            "research.db"
+        );
 
     Directory.CreateDirectory(
         Path.GetDirectoryName(dbPath)!
+    );
+
+    Console.WriteLine(
+        "================================="
     );
 
     Console.WriteLine(
@@ -120,6 +173,10 @@ else
         File.Exists(dbPath)
     );
 
+    Console.WriteLine(
+        "================================="
+    );
+
     connectionString =
         $"Data Source={dbPath}";
 }
@@ -133,11 +190,15 @@ builder.Services.AddDbContext<ApplicationDbContext>(
     {
         if (!string.IsNullOrWhiteSpace(databaseUrl))
         {
-            options.UseNpgsql(connectionString);
+            options.UseNpgsql(
+                connectionString
+            );
         }
         else
         {
-            options.UseSqlite(connectionString);
+            options.UseSqlite(
+                connectionString
+            );
         }
     }
 );
@@ -158,13 +219,16 @@ builder.Services.AddSession();
 // Data Protection
 // =====================================
 
-var keysFolder = Path.Combine(
-    Directory.GetCurrentDirectory(),
-    "App_Data",
-    "DataProtectionKeys"
-);
+var keysFolder =
+    Path.Combine(
+        Directory.GetCurrentDirectory(),
+        "App_Data",
+        "DataProtectionKeys"
+    );
 
-Directory.CreateDirectory(keysFolder);
+Directory.CreateDirectory(
+    keysFolder
+);
 
 builder.Services
     .AddDataProtection()
@@ -196,11 +260,26 @@ using (var scope = app.Services.CreateScope())
         "Applying database migrations..."
     );
 
-    db.Database.Migrate();
+    try
+    {
+        db.Database.Migrate();
 
-    Console.WriteLine(
-        "Database migrations completed."
-    );
+        Console.WriteLine(
+            "Database migrations completed."
+        );
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(
+            "DATABASE MIGRATION ERROR:"
+        );
+
+        Console.WriteLine(
+            ex.ToString()
+        );
+
+        throw;
+    }
 
     Console.WriteLine(
         "================================="
@@ -221,17 +300,35 @@ using (var scope = app.Services.CreateScope())
         "================================="
     );
 
-    Console.WriteLine(
-        $"Research Count = {db.Researches.Count()}"
-    );
+    try
+    {
+        Console.WriteLine(
+            $"Research Count = " +
+            $"{db.Researches.Count()}"
+        );
 
-    Console.WriteLine(
-        $"Users count = {db.Users.Count()}"
-    );
+        Console.WriteLine(
+            $"Users count = " +
+            $"{db.Users.Count()}"
+        );
 
-    Console.WriteLine(
-        $"Visitors count = {db.Visitors.Count()}"
-    );
+        Console.WriteLine(
+            $"Visitors count = " +
+            $"{db.Visitors.Count()}"
+        );
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(
+            "DATABASE CHECK ERROR:"
+        );
+
+        Console.WriteLine(
+            ex.ToString()
+        );
+
+        throw;
+    }
 
     Console.WriteLine(
         "================================="
@@ -298,7 +395,8 @@ app.MapControllers();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Login}/{action=Index}/{id?}"
+    pattern:
+        "{controller=Login}/{action=Index}/{id?}"
 );
 
 // =====================================
