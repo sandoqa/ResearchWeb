@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ResearchWeb.Data;
 using ResearchWeb.Models;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace ResearchWeb.Controllers
 {
@@ -16,10 +18,8 @@ namespace ResearchWeb.Controllers
             _context = context;
         }
 
-
         // =====================================================
         // اختبار الاتصال
-        //
         // GET:
         // https://researchweb-mhot.onrender.com/Sync/Test
         // =====================================================
@@ -30,10 +30,8 @@ namespace ResearchWeb.Controllers
             return Ok("SYNC API يعمل بنجاح");
         }
 
-
         // =====================================================
         // استقبال المزامنة من برنامج VB.NET
-        //
         // POST:
         // https://researchweb-mhot.onrender.com/Sync/Receive
         // =====================================================
@@ -43,6 +41,9 @@ namespace ResearchWeb.Controllers
         public async Task<IActionResult> Receive(
             [FromBody] List<Research2026> researches)
         {
+            await using var transaction =
+                await _context.Database.BeginTransactionAsync();
+
             try
             {
                 // =================================================
@@ -58,7 +59,6 @@ namespace ResearchWeb.Controllers
                     });
                 }
 
-
                 // =================================================
                 // منع تكرار نفس ID داخل البيانات القادمة
                 // =================================================
@@ -68,23 +68,41 @@ namespace ResearchWeb.Controllers
                     .Select(g => g.First())
                     .ToList();
 
+                // =================================================
+                // إصلاح نوع التاريخ
+                //
+                // PostgreSQL timestamp with time zone
+                // يحتاج DateTime من نوع UTC.
+                //
+                // SpecifyKind يحافظ على نفس التاريخ والوقت
+                // القادم من Access بدون تحويل ساعات.
+                // =================================================
+
+                foreach (var research in researches)
+                {
+                    if (research.تاريخ_الاجتماع.HasValue)
+                    {
+                        research.تاريخ_الاجتماع =
+                            DateTime.SpecifyKind(
+                                research.تاريخ_الاجتماع.Value,
+                                DateTimeKind.Utc);
+                    }
+                }
 
                 int added = 0;
                 int updated = 0;
                 int skipped = 0;
                 int deleted = 0;
 
-
                 // =================================================
                 // IDs الموجودة في Access
                 //
-                // هذه القائمة هي المصدر الرئيسي للحذف
+                // Access هو المصدر الرئيسي للمزامنة.
                 // =================================================
 
                 var accessIds = researches
                     .Select(x => x.ID)
                     .ToHashSet();
-
 
                 // =================================================
                 // جلب جميع أبحاث ResearchWeb
@@ -93,7 +111,6 @@ namespace ResearchWeb.Controllers
                 var existingResearches =
                     await _context.Researches
                         .ToListAsync();
-
 
                 // =================================================
                 // معالجة الإضافة والتحديث
@@ -104,7 +121,6 @@ namespace ResearchWeb.Controllers
                     var existing =
                         existingResearches
                             .FirstOrDefault(x => x.ID == source.ID);
-
 
                     // =================================================
                     // البحث غير موجود في ResearchWeb
@@ -142,7 +158,6 @@ namespace ResearchWeb.Controllers
                                 source.توصيات_اللجنة
                         };
 
-
                         _context.Researches.Add(newResearch);
 
                         added++;
@@ -150,14 +165,12 @@ namespace ResearchWeb.Controllers
                         continue;
                     }
 
-
                     // =================================================
                     // البحث موجود
-                    // → مقارنة جميع الحقول
+                    // → مقارنة الحقول
                     // =================================================
 
                     bool changed = false;
-
 
                     if (existing.اسم_الباحث != source.اسم_الباحث)
                     {
@@ -167,7 +180,6 @@ namespace ResearchWeb.Controllers
                         changed = true;
                     }
 
-
                     if (existing.تاريخ_الاجتماع != source.تاريخ_الاجتماع)
                     {
                         existing.تاريخ_الاجتماع =
@@ -175,7 +187,6 @@ namespace ResearchWeb.Controllers
 
                         changed = true;
                     }
-
 
                     if (existing.عنوان_البحث != source.عنوان_البحث)
                     {
@@ -185,7 +196,6 @@ namespace ResearchWeb.Controllers
                         changed = true;
                     }
 
-
                     if (existing.رقم_البحث != source.رقم_البحث)
                     {
                         existing.رقم_البحث =
@@ -193,7 +203,6 @@ namespace ResearchWeb.Controllers
 
                         changed = true;
                     }
-
 
                     if (existing.رقم_الاجتماع != source.رقم_الاجتماع)
                     {
@@ -203,7 +212,6 @@ namespace ResearchWeb.Controllers
                         changed = true;
                     }
 
-
                     if (existing.نتيجة_البحث != source.نتيجة_البحث)
                     {
                         existing.نتيجة_البحث =
@@ -211,7 +219,6 @@ namespace ResearchWeb.Controllers
 
                         changed = true;
                     }
-
 
                     if (existing.رقم_الهاتف != source.رقم_الهاتف)
                     {
@@ -221,7 +228,6 @@ namespace ResearchWeb.Controllers
                         changed = true;
                     }
 
-
                     if (existing.توصيات_اللجنة != source.توصيات_اللجنة)
                     {
                         existing.توصيات_اللجنة =
@@ -229,7 +235,6 @@ namespace ResearchWeb.Controllers
 
                         changed = true;
                     }
-
 
                     if (changed)
                     {
@@ -241,20 +246,17 @@ namespace ResearchWeb.Controllers
                     }
                 }
 
-
                 // =================================================
                 // الحذف
                 //
                 // أي سجل موجود في ResearchWeb
-                // وليس موجودًا في Access
-                // سيتم حذفه
+                // وليس موجودًا في Access سيتم حذفه.
                 // =================================================
 
                 var researchesToDelete =
                     existingResearches
                         .Where(x => !accessIds.Contains(x.ID))
                         .ToList();
-
 
                 foreach (var research in researchesToDelete)
                 {
@@ -263,13 +265,17 @@ namespace ResearchWeb.Controllers
                     deleted++;
                 }
 
-
                 // =================================================
                 // حفظ جميع التغييرات
                 // =================================================
 
                 await _context.SaveChangesAsync();
 
+                // =================================================
+                // تأكيد العملية
+                // =================================================
+
+                await transaction.CommitAsync();
 
                 // =================================================
                 // النتيجة
@@ -297,8 +303,24 @@ namespace ResearchWeb.Controllers
             catch (Exception ex)
             {
                 // =================================================
-                // في حالة الخطأ
+                // إلغاء جميع التغييرات في حالة الخطأ
                 // =================================================
+
+                try
+                {
+                    await transaction.RollbackAsync();
+                }
+                catch
+                {
+                    // تجاهل أي خطأ يحدث أثناء التراجع
+                }
+
+                // =================================================
+                // الخطأ الداخلي الحقيقي
+                // =================================================
+
+                var innerError =
+                    ex.InnerException?.Message;
 
                 return StatusCode(
                     500,
@@ -307,15 +329,15 @@ namespace ResearchWeb.Controllers
                         success = false,
 
                         message =
-                            "حدث خطأ أثناء المزامنة.",
+                            "حدث خطأ أثناء المزامنة، وتم إلغاء العملية بالكامل.",
 
                         error = ex.Message,
 
-                        innerError =
-                            ex.InnerException?.Message
+                        innerError = innerError
                     }
                 );
             }
         }
     }
 }
+
