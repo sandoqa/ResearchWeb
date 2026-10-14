@@ -8,6 +8,8 @@
 
   <ItemGroup>
 
+    <PackageReference Include="ClosedXML" Version="0.105.1" />
+
     <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="9.0.18" />
 
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.18">

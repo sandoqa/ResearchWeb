@@ -6,40 +6,28 @@
     ViewData["Title"] = "الأبحاث العلمية 2026";
 
     var role = Context.Session.GetString("Role");
+    var searchText = Context.Request.Query["search"].ToString();
 }
 
 <style>
-
     /* =========================================================
-           الصف العادي
+           ألوان صفوف اللجان
            ========================================================= */
-
     .committee-row td {
-        background-color: var(--committee-color);
+        background-color: var(--committee-color) !important;
         color: #212529;
     }
 
-
     /* =========================================================
-           الصف غير المقبول
+           وميض الأبحاث غير المقبولة
            ========================================================= */
-
     .rejected-row td {
         font-weight: bold;
-        animation-name: rejectedBlink;
-        animation-duration: 1s;
-        animation-iteration-count: infinite;
-        animation-timing-function: ease-in-out;
+        animation: rejectedBlink 1s infinite ease-in-out;
     }
 
-
-    /* =========================================================
-           الوميض الأحمر
-           ========================================================= */
-
     @@keyframes rejectedBlink {
-
-        0% {
+        0%, 100% {
             background-color: var(--committee-color);
             color: #212529;
         }
@@ -48,183 +36,191 @@
             background-color: #ff0000;
             color: #ffffff;
         }
-
-        100% {
-            background-color: var(--committee-color);
-            color: #212529;
-        }
     }
 
-
     /* =========================================================
-           منع Bootstrap من تغيير لون الصف
+           منع Bootstrap من تغيير ألوان الصفوف
            ========================================================= */
-
     .research-table tbody tr:nth-of-type(odd) td,
     .research-table tbody tr:nth-of-type(even) td {
         background-color: var(--committee-color);
     }
 
-
-    /* =========================================================
-           السماح للوميض بالتغلب على لون Bootstrap
-           ========================================================= */
-
     .research-table tbody tr.rejected-row td {
-        animation-name: rejectedBlink !important;
+        animation: rejectedBlink 1s infinite ease-in-out !important;
     }
 
-
     /* =========================================================
-           الجدول
+           تنسيق الجدول
            ========================================================= */
-
-    .research-table td,
-    .research-table th {
+    .research-table th,
+    .research-table td {
         vertical-align: middle;
+        text-align: center;
     }
-
-
-    /* =========================================================
-           الحدود
-           ========================================================= */
 
     .research-table td {
         border-color: rgba(0, 0, 0, 0.15);
     }
 
-</style>
+    .research-table thead th {
+        white-space: nowrap;
+    }
 
+    /* =========================================================
+           تنسيق مجموعة الأزرار
+           ========================================================= */
+    .research-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 18px;
+        align-items: center;
+    }
+
+        .research-actions .btn {
+            min-height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+        }
+
+    /* =========================================================
+           مربع البحث
+           ========================================================= */
+    .research-search {
+        margin-bottom: 18px;
+    }
+
+    /* =========================================================
+           تحسين العرض على الهاتف
+           ========================================================= */
+    @@media (max-width: 768px) {
+        .research-actions .btn {
+            flex: 1 1 45%;
+        }
+
+        .research-table {
+            font-size: 13px;
+        }
+    }
+</style>
 
 <h2 class="text-center mb-4">
     الأبحاث العلمية 2026
 </h2>
 
+<!-- =========================================================
+     أزرار العمليات
+     ========================================================= -->
+<div class="research-actions">
 
-@if (role == "Admin")
-{
+    @if (role == "Admin")
+    {
+        <a asp-controller="Research"
+           asp-action="Create"
+           class="btn btn-success">
+            ➕ إضافة بحث جديد
+        </a>
+    }
+
     <a asp-controller="Research"
-       asp-action="Create"
-       class="btn btn-success mb-3">
-
-        ➕ إضافة بحث جديد
-
+       asp-action="Duplicates"
+       class="btn btn-danger">
+        🔁 فحص الأبحاث المكررة
     </a>
-}
 
+    <a asp-controller="Research"
+       asp-action="ByMeeting"
+       class="btn btn-info">
+        📅 أبحاث حسب رقم اللجنة
+    </a>
 
-<a asp-controller="Research"
-   asp-action="Duplicates"
-   class="btn btn-danger mb-3">
+    <a asp-controller="Research"
+       asp-action="Rejected"
+       class="btn btn-danger">
+        ❌ الأبحاث غير المقبولة
+    </a>
 
-    🔁 فحص الأبحاث المكررة
+    <!-- تصدير نتائج البحث الحالية إلى Excel -->
+    <a asp-controller="Research"
+       asp-action="ExportExcel"
+       asp-route-search="@searchText"
+       class="btn btn-success">
+        📊 تصدير إلى Excel
+    </a>
 
-</a>
+</div>
 
-
-<a asp-controller="Research"
-   asp-action="ByMeeting"
-   class="btn btn-info mb-3">
-
-    📅 أبحاث حسب رقم اللجنة
-
-</a>
-
-
-<a asp-controller="Research"
-   asp-action="Rejected"
-   class="btn btn-danger mb-3">
-
-    ❌ الأبحاث غير المقبولة
-
-</a>
-
-
-<form method="get" class="mb-3">
+<!-- =========================================================
+     البحث
+     ========================================================= -->
+<form asp-controller="Research"
+      asp-action="Index"
+      method="get"
+      class="research-search">
 
     <div class="input-group">
 
         <input type="text"
                name="search"
-               value="@Context.Request.Query["search"]"
+               value="@searchText"
                class="form-control"
                placeholder="ابحث باسم الباحث أو عنوان البحث أو رقم البحث أو الهاتف..." />
 
         <button class="btn btn-primary"
                 type="submit">
-
             🔍 بحث
-
         </button>
 
-
-        <a asp-action="Index"
+        <a asp-controller="Research"
+           asp-action="Index"
            class="btn btn-secondary">
-
             ✖ مسح
-
         </a>
 
     </div>
-
 </form>
 
-
+<!-- =========================================================
+     عدد الأبحاث
+     ========================================================= -->
 <div class="alert alert-info text-center">
-
     عدد الأبحاث:
-
-    <strong>
-        @Model.Count()
-    </strong>
-
+    <strong>@Model.Count()</strong>
 </div>
 
-
+<!-- =========================================================
+     جدول الأبحاث
+     ========================================================= -->
 <div class="table-responsive">
 
     <table class="table table-bordered text-center research-table">
 
         <thead class="table-dark">
-
             <tr>
-
                 <th>ID</th>
-
                 <th>اسم الباحث</th>
-
                 <th>تاريخ الاجتماع</th>
-
                 <th>عنوان البحث</th>
-
                 <th>رقم البحث</th>
-
                 <th>رقم اللجنة</th>
-
                 <th>نتيجة البحث</th>
-
                 <th>رقم الهاتف</th>
-
                 <th>توصيات اللجنة</th>
 
                 @if (role == "Admin")
                 {
                     <th>إجراءات</th>
                 }
-
             </tr>
-
         </thead>
 
-
         <tbody>
-
             @foreach (var item in Model)
             {
-                /* =====================================================
-                رقم اللجنة
-                ===================================================== */
-
+                // قراءة رقم اللجنة
                 int meetingNumber = 0;
 
                 int.TryParse(
@@ -232,52 +228,26 @@
                 out meetingNumber
                 );
 
-
-                /* =====================================================
-                إنشاء اللون
-
-                كل لجنة لها لون خاص بها.
-                ===================================================== */
-
-                double hue =
-                (meetingNumber * 137.508) % 360;
-
+                // إنشاء لون ثابت ومميز لكل لجنة
+                double hue = (meetingNumber * 137.508) % 360;
 
                 string committeeColor =
                 $"hsl({hue:F0}, 70%, 88%)";
 
-
-                /* =====================================================
-                هل البحث غير مقبول؟
-                ===================================================== */
-
+                // البحث غير المقبول نتيجته 1
                 bool isRejected =
                 item.نتيجة_البحث?.Trim() == "1";
 
-
-                /* =====================================================
-                تحديد نوع الصف
-                ===================================================== */
-
-                string rowClass =
-                isRejected
+                string rowClass = isRejected
                 ? "rejected-row"
                 : "committee-row";
 
-
                 <tr class="@rowClass"
-                    style="--committee-color:@committeeColor;">
+                    style="--committee-color: @committeeColor;">
 
+                    <td>@item.ID</td>
 
-                    <td>
-                        @item.ID
-                    </td>
-
-
-                    <td>
-                        @item.اسم_الباحث
-                    </td>
-
+                    <td>@item.اسم_الباحث</td>
 
                     <td>
                         @(item.تاريخ_الاجتماع.HasValue
@@ -285,66 +255,44 @@
                                             : "")
                 </td>
 
+                    <td>@item.عنوان_البحث</td>
 
-                    <td>
-                        @item.عنوان_البحث
-                    </td>
+                    <td>@item.رقم_البحث</td>
 
+                    <td>@item.رقم_الاجتماع</td>
 
-                    <td>
-                        @item.رقم_البحث
-                    </td>
+                    <td>@item.نتيجة_البحث</td>
 
+                    <td>@item.رقم_الهاتف</td>
 
-                    <td>
-                        @item.رقم_الاجتماع
-                    </td>
-
-
-                    <td>
-                        @item.نتيجة_البحث
-                    </td>
-
-
-                    <td>
-                        @item.رقم_الهاتف
-                    </td>
-
-
-                    <td>
-                        @item.توصيات_اللجنة
-                    </td>
-
+                    <td>@item.توصيات_اللجنة</td>
 
                 @if (role == "Admin")
                     {
                         <td>
+                            <div class="d-flex flex-wrap justify-content-center gap-1">
 
-                            <a asp-action="Edit"
-                               asp-route-id="@item.ID"
-                               class="btn btn-warning btn-sm">
+                                <a asp-controller="Research"
+                                   asp-action="Edit"
+                                   asp-route-id="@item.ID"
+                                   class="btn btn-warning btn-sm">
+                                    ✏ تعديل
+                                </a>
 
-                                ✏ تعديل
+                                <a asp-controller="Research"
+                                   asp-action="Delete"
+                                   asp-route-id="@item.ID"
+                                   class="btn btn-danger btn-sm"
+                                   onclick="return confirm('هل تريد حذف هذا البحث؟');">
+                                    🗑 حذف
+                                </a>
 
-                            </a>
-
-
-                            <a asp-action="Delete"
-                               asp-route-id="@item.ID"
-                               class="btn btn-danger btn-sm"
-                               onclick="return confirm('هل تريد حذف هذا البحث؟');">
-
-                                🗑 حذف
-
-                            </a>
-
+                            </div>
                         </td>
                     }
 
-
                 </tr>
             }
-
         </tbody>
 
     </table>
